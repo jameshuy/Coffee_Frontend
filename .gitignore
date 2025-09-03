@@ -11,8 +11,6 @@ vite.config.ts.*
 .env.production
 .env.development
 
-attached_assets
-
 package-lock.json
 
 # Logs

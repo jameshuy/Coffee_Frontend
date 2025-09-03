@@ -1,0 +1,177 @@
+/* Import Google fonts */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Libre+Baskerville:wght@400;700&family=Noto+Sans:wght@300&family=Oi&family=IBM+Plex+Sans:wght@300&family=Racing+Sans+One&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  /* Hide scrollbar but still allow scrolling */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+  
+  /* Show scrollbar on hover for styles palette */
+  .styles-scrollable {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .styles-scrollable::-webkit-scrollbar {
+    height: 0px;
+  }
+  
+  .styles-palette-container:hover .styles-scrollable {
+    scrollbar-width: auto;
+    -ms-overflow-style: auto;
+  }
+  .styles-palette-container:hover .styles-scrollable::-webkit-scrollbar {
+    height: 14px;
+  }
+  .styles-palette-container:hover .styles-scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin: 0 20px;
+  }
+  .styles-palette-container:hover .styles-scrollable::-webkit-scrollbar-thumb {
+    background: #ffd700;
+    border-radius: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+  }
+  .styles-palette-container:hover .styles-scrollable::-webkit-scrollbar-thumb:hover {
+    background: #ffed4e;
+  }
+
+  /* Slow scrolling animation for carousel */
+  @keyframes scroll-right-to-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  
+  .animate-scroll-slow {
+    animation: scroll-right-to-left 60s linear infinite;
+  }
+}
+
+/* Hide default close button in poster modal */
+[data-component-name="DialogPrimitive.Close"] {
+  visibility: hidden !important;
+  display: none !important;
+}
+
+@keyframes pulse-animation {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 30px rgba(255, 215, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
+.pulse-animation-container.pulse-animation {
+  animation: pulse-animation 1.5s ease-in-out;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-endless {
+  animation: scroll-endless 6.67s linear infinite;
+}
+
+@keyframes scroll-endless {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-notosans antialiased bg-background text-foreground tracking-wider;
+  }
+
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+    --primary: 229 48% 45%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 340 82% 52%;
+    --accent-foreground: 0 0% 100%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --gold-500: 45 100% 50%;
+    --gold-600: 45 100% 45%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 229 48% 45%;
+    --radius: 0.5rem;
+  }
+
+  .font-montserrat {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .font-roboto {
+    font-family: 'Roboto', sans-serif;
+  }
+  
+  .font-playfair {
+    font-family: 'Playfair Display', serif;
+  }
+  
+  .font-baskerville {
+    font-family: 'Libre Baskerville', serif;
+  }
+  
+  .font-notosans {
+    font-family: 'Noto Sans', sans-serif;
+    font-weight: 300;
+  }
+  
+  .font-oi {
+    font-family: 'Oi', serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  .font-ibm-plex-sans {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  .font-racing-sans {
+    font-family: 'Racing Sans One', cursive;
+    font-weight: 400;
+    font-style: normal;
+  }
+}

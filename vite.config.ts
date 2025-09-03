@@ -19,8 +19,8 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    proxy: {
+    proxy: process.env.NODE_ENV === "development" ? {
       "/api": process.env.VITE_API_URL || "http://localhost:3000", // forward API requests
-    },
+    } : {},
   },
 });

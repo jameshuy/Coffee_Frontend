@@ -22,5 +22,7 @@ export default defineConfig({
     proxy: process.env.NODE_ENV === "development" ? {
       "/api": process.env.VITE_API_URL || "http://localhost:3000", // forward API requests
     } : {},
+    host: '0.0.0.0',
+    port: 5173,
   },
 });

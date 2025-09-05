@@ -83,6 +83,8 @@ function showPosterForFullDuration(
 }
 
 function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }: FeedItemProps) {
+  const API_BASE = import.meta.env.VITE_API_URL || "";
+  const withApiBase = useCallback((path: string) => (path?.startsWith("/") ? `${API_BASE}${path}` : path), [API_BASE]);
   const [isLoading, setIsLoading] = useState(false);
   const [showVideoTransition, setShowVideoTransition] = useState(false);
   const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
@@ -145,10 +147,10 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
       // Prefer compressed video if available, fallback to original
       const videoPath = post.compressedVideoPath || post.originalVideoPath;
       
-      fetch(`/api/storage-image/${videoPath}`, { method: 'HEAD' })
+      fetch(withApiBase(`/api/storage-image/${videoPath}`), { method: 'HEAD' })
         .then(response => {
           if (response.ok) {
-            setVideoObjectUrl(`/api/storage-image/${videoPath}`);
+            setVideoObjectUrl(withApiBase(`/api/storage-image/${videoPath}`));
             setShowVideoTransition(true);
           } else {
             setVideoObjectUrl(null);
@@ -344,7 +346,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
                   {/* Poster overlay that appears at selected frame - use thumbnail for faster loading */}
                   <img
                     id={`poster-overlay-${post.id}`}
-                    src={`/api/storage-image/${post.thumbnailPath || post.generatedPath}`}
+                    src={withApiBase(`/api/storage-image/${post.thumbnailPath || post.generatedPath}`)}
                     className="absolute inset-0 w-full h-full object-contain transition-opacity duration-500 opacity-0"
                     alt="Generated poster at selected frame"
                     onLoad={() => setIsLoading(false)}
@@ -354,7 +356,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
               ) : (
                 // Static poster display - use thumbnail for faster loading
                 <img
-                  src={`/api/storage-image/${post.thumbnailPath || post.generatedPath}`}
+                  src={withApiBase(`/api/storage-image/${post.thumbnailPath || post.generatedPath}`)}
                   className="w-full h-full object-contain"
                   alt="Generated poster"
                   onLoad={() => setIsLoading(false)}
@@ -460,7 +462,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
         <ShareModal
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
-          imageUrl={`/api/storage-image/${post.generatedPath}`}
+          imageUrl={withApiBase(`/api/storage-image/${post.generatedPath}`)}
           shareContext="catalogue"
           posterId={post.id}
         />
@@ -471,7 +473,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
         <CatalogueImageModal
           isOpen={showCatalogueModal}
           onClose={() => setShowCatalogueModal(false)}
-          imageUrl={`/api/storage-image/${post.generatedPath}`}
+          imageUrl={withApiBase(`/api/storage-image/${post.generatedPath}`)}
           style={post.style}
           id={post.id}
           username={post.username}

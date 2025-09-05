@@ -4,27 +4,27 @@ import { trackStyleSelection, trackEvent } from '@/lib/analytics';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 // Object Storage paths to style thumbnails (alphabetically ordered, via direct API routes)
 // These paths use our storage-image endpoint that serves from Object Storage
-const alpinecoastal_thumbnail = '/api/storage-image/styles/thumbnails/alpinecoastal_thumbnail.png';
-const artdecoThumbnail = '/api/storage-image/styles/thumbnails/artdeco_thumbnail.png';
-const artnouveauThumbnail = '/api/storage-image/styles/thumbnails/artnouveau_thumbnail.png';
-const bauhausThumbnail = '/api/storage-image/styles/thumbnails/bauhaus_thumbnail.png';
-const brutalistdecayThumbnail = '/api/storage-image/styles/thumbnails/brutalistdecay_thumbnail.png';
-const crystallineindustryThumbnail = '/api/storage-image/styles/thumbnails/crystallineindustry_thumbnail.png';
-const goldenglimpseThumbnail = '/api/storage-image/styles/thumbnails/goldenglimpse_thumbnail.png';
-const impressionistThumbnail = '/api/storage-image/styles/thumbnails/impressionist_thumbnail.png';
-const minimalmodernistThumbnail = '/api/storage-image/styles/thumbnails/minimalmodernist_thumbnail.png';
-const neoretromotorThumbnail = '/api/storage-image/styles/thumbnails/neoretromotor_thumbnail.png';
-const neovintageThumbnail = '/api/storage-image/styles/thumbnails/neovintage_thumbnail.png';
-const novaprismaThumbail = '/api/storage-image/styles/thumbnails/novaprisma_thumbnail.png';
-const parallelpopThumbnail = '/api/storage-image/styles/thumbnails/parallelpop_thumbnail.png';
-const popartThumbnail = '/api/storage-image/styles/thumbnails/popart_thumbnail.png';
-const renaissanceThumbnail = '/api/storage-image/styles/thumbnails/renaissance_thumbnail.png';
-const retrooptical_thumbnail = '/api/storage-image/styles/thumbnails/retrooptical_thumbnail.png';
-const retroscenicThumbnail = '/api/storage-image/styles/thumbnails/retroscenic_thumbnail.png';
-const sepiahellenic_thumbnail = '/api/storage-image/styles/thumbnails/sepiahellenic_thumbnail.png';
-const surrealistThumbnail = '/api/storage-image/styles/thumbnails/surrealist_thumbnail.png';
-const majolicaThumbnail = '/api/storage-image/styles/thumbnails/majolica_thumbnail.png';
-const tuscanlavenderThumbnail = '/api/storage-image/styles/thumbnails/tuscanlavender_thumbnail.png';
+const alpinecoastal_thumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/alpinecoastal_thumbnail.png`;
+const artdecoThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/artdeco_thumbnail.png`;
+const artnouveauThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/artnouveau_thumbnail.png`;
+const bauhausThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/bauhaus_thumbnail.png`;
+const brutalistdecayThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/brutalistdecay_thumbnail.png`;
+const crystallineindustryThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/crystallineindustry_thumbnail.png`;
+const goldenglimpseThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/goldenglimpse_thumbnail.png`;
+const impressionistThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/impressionist_thumbnail.png`;
+const minimalmodernistThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/minimalmodernist_thumbnail.png`;
+const neoretromotorThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/neoretromotor_thumbnail.png`;
+const neovintageThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/neovintage_thumbnail.png`;
+const novaprismaThumbail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/novaprisma_thumbnail.png`;
+const parallelpopThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/parallelpop_thumbnail.png`;
+const popartThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/popart_thumbnail.png`;
+const renaissanceThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/renaissance_thumbnail.png`;
+const retrooptical_thumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/retrooptical_thumbnail.png`;
+const retroscenicThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/retroscenic_thumbnail.png`;
+const sepiahellenic_thumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/sepiahellenic_thumbnail.png`;
+const surrealistThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/surrealist_thumbnail.png`;
+const majolicaThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/majolica_thumbnail.png`;
+const tuscanlavenderThumbnail = `${import.meta.env.VITE_API_URL}/api/storage-image/styles/thumbnails/tuscanlavender_thumbnail.png`;
 
 import { type StyleData } from '@/data';
 

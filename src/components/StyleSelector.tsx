@@ -168,28 +168,6 @@ export function StyleSelector({
     // Removed auto-scroll to generate button
   }, [onSelectStyle, snapToPosition]);
   
-  // Handle scroll with snap-to behavior
-  const handleScroll = useCallback(() => {
-    if (!scrollContainerRef.current || isScrolling) return;
-    
-    const scrollTop = scrollContainerRef.current.scrollTop;
-    // Adjust for proper centering in the 420px container
-    const adjustedScrollTop = scrollTop + 210;
-    const newIndex = Math.round(adjustedScrollTop / ITEM_HEIGHT);
-    
-    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < styles.length) {
-      setCurrentIndex(newIndex);
-      
-      // Auto-select the centered style
-      const style = styles[newIndex];
-      if (style && style.id !== selectedStyle?.id) {
-        trackStyleSelection(style.id, style.name);
-        trackEvent('Customize', 'select_style', style.name);
-        onSelectStyle(style);
-      }
-    }
-  }, [currentIndex, styles, selectedStyle, onSelectStyle, isScrolling, ITEM_HEIGHT]);
-  
   // Initialize with selected style index and ensure proper initial positioning
   useEffect(() => {
     const initialIndex = styles.findIndex(style => style.id === selectedStyle?.id);

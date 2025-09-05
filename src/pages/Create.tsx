@@ -350,20 +350,6 @@ export default function Create() {
     return cleanup;
   }, []);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // Function to create a new poster (reset state and go back to upload step)
   const handleCreateAnotherPoster = () => {
     // Check if user should create an account (free credits = 2 and no account)
@@ -383,7 +369,7 @@ export default function Create() {
 
     // Reset state to allow for a new upload
     setStep("upload");
-    resetFormData();
+    resetFormData(STYLES[0]);
     resetOrderState();
     setSelectedStyle(STYLES[0]);
     setShowTextTool(false);
@@ -431,7 +417,7 @@ export default function Create() {
                         />
                       ) : (
                         // Show ImageUploader only when not showing styles
-                        !showStyles && (
+                        !showStyles ? (
                           <ImageUploader
                             onImageUpload={handleFileUpload}
                             onVideoUpload={handleVideoUpload}
@@ -447,34 +433,36 @@ export default function Create() {
                             textOverlay={formData.textOverlay}
                             onImageError={() => updateFormDataField('uploadedImage', null)}
                           />
+                        ) : (
+                          formData.uploadedImage &&
+                            step === "upload" &&
+                            !isPosterGenerated &&
+                            !isGeneratingPoster && (
+                              <div className="w-full -mt-1">
+                                {/* Subheading for style selection - only show when styles are visible */}
+                                {showStyles && (
+                                  <h3 className="text-white text-xl font-racing-sans text-center mb-4">
+                                    Scroll to pick a poster style
+                                  </h3>
+                                )}
+      
+                                {/* Negative margin to move it up slightly */}
+                                <StyleSelector
+                                  styles={availableStyles}
+                                  selectedStyle={selectedStyle}
+                                  onSelectStyle={setSelectedStyle}
+                                  showAsButton={!showStyles}
+                                  onPickStyleClick={() => setShowStyles(true)}
+                                />
+                              </div>
+                            )
                         )
                       )}
                       {/* "Create Another Poster" button has been moved out of this container */}
                     </div>
 
                     {/* Show style selector based on showStyles state */}
-                    {formData.uploadedImage &&
-                      step === "upload" &&
-                      !isPosterGenerated &&
-                      !isGeneratingPoster && (
-                        <div className="w-full -mt-1">
-                          {/* Subheading for style selection - only show when styles are visible */}
-                          {showStyles && (
-                            <h3 className="text-white text-xl font-racing-sans text-center mb-4">
-                              Scroll to pick a poster style
-                            </h3>
-                          )}
-
-                          {/* Negative margin to move it up slightly */}
-                          <StyleSelector
-                            styles={availableStyles}
-                            selectedStyle={selectedStyle}
-                            onSelectStyle={setSelectedStyle}
-                            showAsButton={!showStyles}
-                            onPickStyleClick={() => setShowStyles(true)}
-                          />
-                        </div>
-                      )}
+                    
                   </>
                 )}
               </div>
@@ -507,7 +495,7 @@ export default function Create() {
                       id="create-poster-button"
                       variant="primary"
                       size="large"
-                      onClick={handleGeneratePoster}
+                      onClick={() => handleGeneratePoster(selectedStyle)}
                       disabled={isGeneratingPoster}
                     >
                       create my poster
@@ -590,7 +578,7 @@ export default function Create() {
 
                     <Button
                       className="px-6 py-3 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-lg"
-                      onClick={handleGeneratePoster}
+                      onClick={() => handleGeneratePoster(selectedStyle)}
                       disabled={isGeneratingPoster}
                     >
                       create my poster

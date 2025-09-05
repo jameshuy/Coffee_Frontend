@@ -9,6 +9,7 @@ import {
   trackError,
 } from "@/lib/analytics";
 import { constructPrompt } from "@/lib/utils";
+import { StyleData } from "@/data";
 
 // Type definitions
 interface TextOverlay {
@@ -255,7 +256,7 @@ export function useCreateFlow() {
   };
 
   // Handle poster generation
-  const handleGeneratePoster = async () => {
+  const handleGeneratePoster = async (selectedStyle: StyleData) => {
     if (!formData.uploadedImage) {
       toast({
         title: "No image selected",
@@ -305,20 +306,21 @@ export function useCreateFlow() {
       return;
     }
 
-    trackEvent("Creation", "transform_attempt", formData.selectedStyle?.name);
+    trackEvent("Creation", "transform_attempt", selectedStyle?.name);
     const startTime = performance.now();
 
     try {
       const constructedPrompt = constructPrompt(
-        formData.selectedStyle?.id,
+        selectedStyle?.id,
         formData.selectedFeelings,
       );
 
       const videoPathToUse = formData.videoFrameData?.videoPath || formData.uploadedVideoPath;
 
+      console.log(formData.uploadedImage, selectedStyle.id, constructedPrompt, userEmail, videoPathToUse, formData.videoFrameData?.timestamp, (formData.videoFrameData && videoPathToUse))
       const response = await apiRequest("POST", "/api/generate-gpt-image", {
         imageData: formData.uploadedImage,
-        style: formData.selectedStyle?.id,
+        style: selectedStyle?.id,
         stylePrompt: constructedPrompt,
         email: userEmail,
         originalVideoPath: videoPathToUse,
@@ -361,8 +363,8 @@ export function useCreateFlow() {
         const processingTimeMs = performance.now() - startTime;
 
         trackPosterGeneration(
-          formData.selectedStyle?.id,
-          formData.selectedStyle?.name,
+          selectedStyle?.id,
+          selectedStyle?.name,
           true,
           Math.round(processingTimeMs),
         );
@@ -371,7 +373,7 @@ export function useCreateFlow() {
           "Artistic Transformation",
           "processing_time",
           Math.round(processingTimeMs),
-          formData.selectedStyle?.id,
+          selectedStyle?.id,
         );
 
         // Deduct credit
@@ -398,7 +400,7 @@ export function useCreateFlow() {
         setFormData(prev => ({ ...prev, uploadedImage: null }));
       }
 
-      trackPosterGeneration(formData.selectedStyle?.id, formData.selectedStyle?.name, false);
+      trackPosterGeneration(selectedStyle?.id, selectedStyle?.name, false);
       trackError("poster_transformation", `${errorCategory}: ${errorMessage.substring(0, 100)}`);
 
       toast({
@@ -413,13 +415,13 @@ export function useCreateFlow() {
   };
 
   // Reset form data for new poster
-  const resetFormData = () => {
+  const resetFormData = (selectedStyle: StyleData) => {
     setFormData({
       uploadedImage: null,
       uploadedVideo: null,
       uploadedVideoPath: null,
       videoFrameData: null,
-      selectedStyle: formData.selectedStyle,
+      selectedStyle: selectedStyle,
       selectedFeelings: ["", "", ""],
       textOverlay: null,
     });

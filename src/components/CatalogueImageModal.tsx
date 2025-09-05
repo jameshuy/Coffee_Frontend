@@ -218,7 +218,7 @@ export default function CatalogueImageModal({
             
             {/* Hidden image for loading detection */}
             <img
-              src={imageUrl}
+              src={import.meta.env.VITE_API_URL + imageUrl}
               alt=""
               className="hidden"
               onLoad={() => setImageLoading(false)}

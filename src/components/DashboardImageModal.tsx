@@ -310,7 +310,7 @@ export default function DashboardImageModal({
                 }}
               >
                 <img
-                  src={imageUrl}
+                  src={import.meta.env.VITE_API_URL + imageUrl}
                   alt={`Poster with ${style} style`}
                   className="select-none pointer-events-none"
                   draggable="false"
@@ -330,7 +330,7 @@ export default function DashboardImageModal({
             
             {/* Hidden image for loading detection */}
             <img
-              src={imageUrl}
+              src={import.meta.env.VITE_API_URL + imageUrl}
               alt=""
               className="hidden"
               onLoad={() => setImageLoading(false)}

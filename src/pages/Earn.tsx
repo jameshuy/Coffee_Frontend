@@ -129,7 +129,7 @@ export default function Earn() {
                       className="aspect-[3/4] w-48 md:w-64 lg:w-72 flex-shrink-0 overflow-hidden bg-white/5 border-8 border-white"
                     >
                       <img
-                        src={image.imageUrl}
+                        src={import.meta.env.VITE_API_URL + image.imageUrl}
                         alt={`Featured work ${index + 1}`}
                         className="w-full h-full object-cover"
                         loading="lazy"

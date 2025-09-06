@@ -582,7 +582,7 @@ export default function ImageUploader({
                   </div>
                 ) : (
                   <img 
-                    src={uploadedImage} 
+                    src={import.meta.env.VITE_API_URL + uploadedImage} 
                     className={`w-full h-full object-cover transition-all duration-1000 ease-in-out ${
                       isGenerating ? 'opacity-40' : 'opacity-100'
                     }`}

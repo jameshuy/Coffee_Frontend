@@ -342,7 +342,7 @@ export default function CartCheckoutModal({
                                   <div 
                                     className="absolute inset-0 m-[8%]"
                                     style={{
-                                      backgroundImage: `url(${item.imageUrl})`,
+                                      backgroundImage: `url(${import.meta.env.VITE_API_URL + item.imageUrl})`,
                                       backgroundSize: "cover",
                                       backgroundPosition: "center",
                                     }}

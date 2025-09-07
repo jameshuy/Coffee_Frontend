@@ -346,10 +346,10 @@ export function useCreateFlow() {
 
       if (data && (data.posterUrl || data.previewUrl)) {
         const displayUrl = data.previewUrl || data.posterUrl;
-        const fullUrl = window.location.origin + displayUrl;
+        // const fullUrl = window.location.origin + displayUrl;
+        const fullUrl = import.meta.env.VITE_API_URL + displayUrl;
 
-        console.log(window.location.origin, "prefix", fullUrl, "FULL URL");
-        setFormData(prev => ({ ...prev, uploadedImage: displayUrl }));
+        setFormData(prev => ({ ...prev, uploadedImage: fullUrl }));
         setIsPosterGenerated(true);
 
         const img = new Image();

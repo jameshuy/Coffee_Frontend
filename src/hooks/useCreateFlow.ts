@@ -348,7 +348,8 @@ export function useCreateFlow() {
         const displayUrl = data.previewUrl || data.posterUrl;
         const fullUrl = window.location.origin + displayUrl;
 
-        setFormData(prev => ({ ...prev, uploadedImage: fullUrl }));
+        console.log(window.location.origin, "prefix", fullUrl, "FULL URL");
+        setFormData(prev => ({ ...prev, uploadedImage: displayUrl }));
         setIsPosterGenerated(true);
 
         const img = new Image();

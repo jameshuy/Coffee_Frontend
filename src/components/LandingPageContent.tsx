@@ -16,22 +16,38 @@ export default function LandingPageContent() {
 
   // Effect to cycle through media
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout | null = null;
+    let interval: NodeJS.Timeout;
 
+    // If current media is a video, wait for it to end before moving to next
     if (SLIDESHOW_MEDIA[currentMediaIndex].type === 'video' && videoRef.current) {
       const video = videoRef.current;
-      video.addEventListener('ended', nextSlide);
-      video.play().catch(console.error);
-      return () => {
-        video.removeEventListener('ended', nextSlide);
+
+      const handleVideoEnd = () => {
+        setCurrentMediaIndex((prevIndex) =>
+          prevIndex === SLIDESHOW_MEDIA.length - 1 ? 0 : prevIndex + 1
+        );
       };
+
+      video.addEventListener('ended', handleVideoEnd);
+      video.play().catch(console.error);
+
+      return () => {
+        video.removeEventListener('ended', handleVideoEnd);
+      };
+    } else {
+      // For images, change after 1 second
+      interval = setInterval(() => {
+        setCurrentMediaIndex((prevIndex) =>
+          prevIndex === SLIDESHOW_MEDIA.length - 1 ? 0 : prevIndex + 1
+        );
+      }, 1000);
     }
 
-    timeoutId = setTimeout(nextSlide, 1000);
+    // Clean up
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      if (interval) clearInterval(interval);
     };
-  }, [currentMediaIndex, nextSlide]);
+  }, [currentMediaIndex]);
 
   return (
     <div className="w-full mx-auto flex flex-col items-center">

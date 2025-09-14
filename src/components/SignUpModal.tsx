@@ -207,7 +207,7 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-black border-[#f1b917] text-white">
+      <DialogContent className="w-[calc(100%-1rem)] max-w-[420px] sm:max-w-[425px] bg-black border-[#f1b917] text-white">
         <ModalHeader 
           title={step === "verification" ? "Verify Your Email" : "Sign Up"}
           description={step === "verification" ? `We've sent a 6-digit verification code to ${email}. Please check your inbox and enter the code below:` : ""}

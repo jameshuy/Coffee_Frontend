@@ -68,7 +68,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-black border-[#f1b917] text-white">
+      <DialogContent className="w-[calc(100%-1rem)] max-w-[400px] sm:max-w-[425px] bg-black border-[#f1b917] text-white">
         <ModalHeader title="Welcome Back" description="" />
 
         <div className="grid gap-4 py-4">

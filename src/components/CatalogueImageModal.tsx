@@ -172,7 +172,7 @@ export default function CatalogueImageModal({
                   }}
                 >
                   <img
-                    src={import.meta.env.VITE_API_URL + imageUrl}
+                    src={imageUrl}
                     alt={`Poster with ${style} style`}
                     className={!isAdminView ? "select-none pointer-events-none" : ""}
                     draggable={isAdminView ? true : false}

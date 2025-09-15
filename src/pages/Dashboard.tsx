@@ -103,7 +103,7 @@ export default function Dashboard() {
               <DashboardImageModal
                 isOpen={!!selectedImage}
                 onClose={closeImageModal}
-                imageUrl={import.meta.env.VITE_API_URL + "/api/storage-image/"+ selectedImage.imageUrl}
+                imageUrl={import.meta.env.VITE_API_URL + selectedImage.imageUrl}
                 style={selectedImage.style}
                 id={selectedImage.id}
                 isPublic={selectedImage.isPublic}
@@ -125,7 +125,7 @@ export default function Dashboard() {
                   <div className="w-full bg-black" style={{ aspectRatio: '1/1.414' }}>
                     <div className="w-full h-full relative group hover:outline hover:outline-[12px] hover:outline-white transition-all duration-300">
                       <img 
-                        src={import.meta.env.VITE_API_URL + "/api/storage-image/" + image.imageUrl} 
+                        src={import.meta.env.VITE_API_URL + image.imageUrl} 
                         alt={`Poster with ${image.style} style`}
                         className="w-full h-full object-fill transition-all duration-300 select-none pointer-events-none"
                         loading="lazy"

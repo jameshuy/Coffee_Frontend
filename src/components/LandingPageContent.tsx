@@ -101,7 +101,7 @@ export default function LandingPageContent() {
                 <img src="/partners/kiosko-bello.jpg" alt="Kiosko Bello" className="w-full h-full object-cover" />
               </div>
             </a>
-            <a href="https://www.caffeyolo.ch/" target="_blank" rel="noopener noreferrer" className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0">
+            <a href="https://www.instagram.com/caffeyolo_luzern" target="_blank" rel="noopener noreferrer" className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0">
               <div className="bg-white rounded-md overflow-hidden flex items-center justify-center" style={{ height: 'clamp(60px, 15vw, 120px)', width: 'clamp(60px, 15vw, 120px)' }}>
                 <img src="/partners/caffeyolo.jpg" alt="Caffèyolo" className="w-full h-full object-cover" />
               </div>

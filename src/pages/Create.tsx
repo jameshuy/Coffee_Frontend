@@ -261,7 +261,7 @@ export default function Create() {
 
     // Track the event
     trackEvent("Selling", "sell_button_clicked");
-
+    const generatedPosterUrl = formData.uploadedImage;
     if (generatedPosterUrl && userEmail) {
       // Always open the sell poster modal - it will handle subscription checking internally
       setIsSellPosterModalOpen(true);

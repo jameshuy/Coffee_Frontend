@@ -331,7 +331,7 @@ export default function SellPosterModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto bg-black border-gray-800 hide-default-close">
+        <DialogContent className="w-[calc(100%-1rem)] sm:max-w-md max-h-[90vh] overflow-y-auto bg-black border-gray-800 hide-default-close">
           {/* Custom close button to match cart modal */}
           <button
             onClick={onClose}

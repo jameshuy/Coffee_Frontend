@@ -260,9 +260,9 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                 {isCreatePage && (
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Create</span>
                 )}
-                {isPartnersPage && (
+                {/* {isPartnersPage && (
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Partners</span>
-                )}
+                )} */}
               </div>
               
               {/* Tagline underneath heading for home page */}

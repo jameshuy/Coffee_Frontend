@@ -185,7 +185,7 @@ export default function AdminReview() {
                 <div className="w-full bg-black" style={{ aspectRatio: '1/1.414' }}>
                   <div className="w-full h-full relative group hover:outline hover:outline-[12px] hover:outline-white transition-all duration-300">
                     <img
-                      src={image.imageUrl}
+                      src={import.meta.env.VITE_API_URL + image.imageUrl}
                       alt={`Poster with ${image.style || 'unknown'} style`}
                       className="w-full h-full object-fill transition-all duration-300"
                       loading="lazy"

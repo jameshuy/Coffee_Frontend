@@ -114,7 +114,8 @@
   }
 
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 0%;
+    --destructive: 0 84.2% 60.2%;
     --foreground: 222.2 47.4% 11.2%;
     --primary: 229 48% 45%;
     --primary-foreground: 0 0% 100%;

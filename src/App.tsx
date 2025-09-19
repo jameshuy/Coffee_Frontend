@@ -18,6 +18,7 @@ import Dashboard from "@/pages/Dashboard";
 import Earn from "@/pages/Earn";
 import Settings from "@/pages/Settings";
 import Partners from "@/pages/Partners";
+import AdminReview from "./pages/AdminReview";
 import ExternalRedirect from "@/components/ExternalRedirect";
 
 function Router() {
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/orders" component={AdminOrders} />
       <Route path="/admin/catalogue" component={AdminCatalogue} />
+      <Route path="/admin/review" component={AdminReview} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -36,7 +36,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Eye, LogOut, RefreshCw, Download } from "lucide-react";
+import { Loader2, Search, Eye, LogOut, RefreshCw, Download, Database } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function AdminOrders() {
@@ -44,8 +44,9 @@ export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [selectedCatalogueOrder, setSelectedCatalogueOrder] = useState<{order: CatalogueOrder, items: CatalogueOrderItem[]} | null>(null);
+  const [selectedCatalogueOrder, setSelectedCatalogueOrder] = useState<{ order: CatalogueOrder, items: CatalogueOrderItem[] } | null>(null);
   const [viewCatalogueOrders, setViewCatalogueOrders] = useState(false);
+  const [isDownloadingStorage, setIsDownloadingStorage] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
 
@@ -55,11 +56,11 @@ export default function AdminOrders() {
     isLoading: isStandardLoading,
     error: standardError,
     refetch: refetchStandard
-  } = useQuery<{orders: Order[]}>({
+  } = useQuery<{ orders: Order[] }>({
     queryKey: ["/api/admin/orders"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/admin/orders");
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           setLocation("/admin/login");
@@ -67,22 +68,22 @@ export default function AdminOrders() {
         }
         throw new Error("Failed to fetch orders");
       }
-      
+
       return response.json();
     },
   });
-  
+
   // Fetch catalogue orders query
   const {
     data: catalogueOrdersResponse,
     isLoading: isCatalogueLoading,
     error: catalogueError,
     refetch: refetchCatalogue
-  } = useQuery<{orders: CatalogueOrder[]}>({
+  } = useQuery<{ orders: CatalogueOrder[] }>({
     queryKey: ["/api/admin/catalogue-orders"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/admin/catalogue-orders");
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           setLocation("/admin/login");
@@ -90,11 +91,11 @@ export default function AdminOrders() {
         }
         throw new Error("Failed to fetch catalogue orders");
       }
-      
+
       return response.json();
     },
   });
-  
+
   // Extract orders array from the responses
   const orders = ordersResponse?.orders || [];
   const catalogueOrders = catalogueOrdersResponse?.orders || [];
@@ -125,7 +126,7 @@ export default function AdminOrders() {
       });
     },
   });
-  
+
   // Update catalogue order status mutation
   const updateCatalogueStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
@@ -182,11 +183,11 @@ export default function AdminOrders() {
   const handleExportCSV = async () => {
     try {
       const response = await apiRequest("GET", "/api/admin/orders/export/csv");
-      
+
       if (!response.ok) {
         throw new Error("Failed to export orders");
       }
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -196,7 +197,7 @@ export default function AdminOrders() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       toast({
         title: "Export successful",
         description: "Orders have been exported to CSV",
@@ -223,11 +224,11 @@ export default function AdminOrders() {
   const handleViewOrder = async (orderId: number) => {
     try {
       const response = await apiRequest("GET", `/api/admin/orders/${orderId}`);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch order details");
       }
-      
+
       const data = await response.json();
       setSelectedOrder(data.order);
     } catch (error) {
@@ -243,13 +244,13 @@ export default function AdminOrders() {
   const handleViewCatalogueOrder = async (orderId: number) => {
     try {
       const response = await apiRequest("GET", `/api/admin/catalogue-orders/${orderId}`);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch catalogue order details");
       }
-      
+
       const data = await response.json();
-      
+
       // Make sure all image URLs are properly formatted for display
       const updatedItems = data.items.map((item: any) => {
         // If the posterImageUrl is relative (doesn't start with http), make it absolute
@@ -260,7 +261,7 @@ export default function AdminOrders() {
         }
         return item;
       });
-      
+
       setSelectedCatalogueOrder({
         order: data.order,
         items: updatedItems
@@ -286,7 +287,7 @@ export default function AdminOrders() {
 
     return matchesSearchTerm && matchesStatusFilter;
   });
-  
+
   // Filter catalogue orders based on search term and status
   const filteredCatalogueOrders = catalogueOrders.filter((order) => {
     const matchesSearchTerm =
@@ -323,7 +324,7 @@ export default function AdminOrders() {
     const checkAuth = async () => {
       try {
         const response = await apiRequest("GET", "/api/admin/orders");
-        
+
         if (response.status === 401) {
           setLocation("/admin/login");
         }
@@ -332,7 +333,7 @@ export default function AdminOrders() {
         setLocation("/admin/login");
       }
     };
-    
+
     checkAuth();
   }, [setLocation]);
 
@@ -409,6 +410,23 @@ export default function AdminOrders() {
               <Download className="mr-2 h-4 w-4" /> Export CSV
             </Button>
             <Button
+              onClick={() => {}}
+              disabled={isDownloadingStorage}
+              className="bg-[#f1b917] hover:bg-opacity-90 text-white"
+            >
+              {isDownloadingStorage ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Database className="mr-2 h-4 w-4" />
+                  Download Object Storage
+                </>
+              )}
+            </Button>
+            <Button
               onClick={() => viewCatalogueOrders ? refetchCatalogue() : refetchStandard()}
               variant="outline"
               className="border-[#f1b917] text-[#f1b917] hover:bg-[#f1b917] hover:bg-opacity-20"
@@ -421,6 +439,14 @@ export default function AdminOrders() {
                 className="border-[#f1b917] text-[#f1b917] hover:bg-[#f1b917] hover:bg-opacity-20"
               >
                 View Full Images
+              </Button>
+            </Link>
+            <Link href="/admin/review">
+              <Button
+                variant="outline"
+                className="border-[#f1b917] text-[#f1b917] hover:bg-[#f1b917] hover:bg-opacity-20"
+              >
+                Review Queue
               </Button>
             </Link>
             <Button
@@ -549,9 +575,9 @@ export default function AdminOrders() {
                                         <h3 className="font-semibold mb-4 text-[#f1b917]">Poster Image</h3>
                                         <div className="bg-white p-4 shadow-lg rounded-sm overflow-hidden" style={{ aspectRatio: "1/1.414" }}>
                                           {selectedOrder.posterImageUrl || selectedOrder.originalImageUrl ? (
-                                            <img 
-                                              src={selectedOrder.posterImageUrl ?? selectedOrder.originalImageUrl ?? undefined} 
-                                              alt="Poster" 
+                                            <img
+                                              src={selectedOrder.posterImageUrl ?? selectedOrder.originalImageUrl ?? undefined}
+                                              alt="Poster"
                                               className="w-full h-full object-cover"
                                             />
                                           ) : (
@@ -808,7 +834,7 @@ export default function AdminOrders() {
                                         </div>
                                       </div>
                                     </div>
-                                    
+
                                     <div className="mt-6 bg-gray-800 p-4 rounded-md">
                                       <h3 className="font-semibold mb-3 text-[#f1b917] border-b border-gray-700 pb-2">
                                         Order Items
@@ -827,9 +853,9 @@ export default function AdminOrders() {
                                               </div>
                                               <div className="col-span-1">
                                                 {item.posterImageUrl ? (
-                                                  <img 
-                                                    src={item.posterImageUrl} 
-                                                    alt={item.style || "Catalogue item"} 
+                                                  <img
+                                                    src={item.posterImageUrl}
+                                                    alt={item.style || "Catalogue item"}
                                                     className="max-h-20 w-auto object-contain bg-black p-1 rounded"
                                                   />
                                                 ) : (
@@ -850,9 +876,9 @@ export default function AdminOrders() {
                                     defaultValue={(selectedCatalogueOrder?.order?.status ?? "pending") as string}
                                     onValueChange={(value) => {
                                       if (selectedCatalogueOrder) {
-                                        updateCatalogueStatusMutation.mutate({ 
-                                          id: selectedCatalogueOrder.order.id, 
-                                          status: value 
+                                        updateCatalogueStatusMutation.mutate({
+                                          id: selectedCatalogueOrder.order.id,
+                                          status: value
                                         });
                                       }
                                     }}

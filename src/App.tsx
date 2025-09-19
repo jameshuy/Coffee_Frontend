@@ -18,6 +18,7 @@ import Dashboard from "@/pages/Dashboard";
 import Earn from "@/pages/Earn";
 import Settings from "@/pages/Settings";
 import Partners from "@/pages/Partners";
+import ExternalRedirect from "@/components/ExternalRedirect";
 
 function Router() {
   return (
@@ -30,6 +31,10 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/earn" component={Earn} />
       <Route path="/partners" component={Partners} />
+      <Route path="/restock">
+        <ExternalRedirect to={`${import.meta.env.VITE_API_URL}/restock`} />
+      </Route>
+      
       <Route path="/admin">
         <Redirect to="/admin/login" />
       </Route>

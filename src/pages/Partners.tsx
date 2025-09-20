@@ -6,6 +6,8 @@ import { trackEvent } from "@/lib/analytics";
 import { LoginModal } from "@/components/LoginModal";
 import { SignUpModal } from "@/components/SignUpModal";
 import { PartnerModal } from "@/components/PartnerModal";
+import { PARTNER_CAFES } from "@/data/partner-cafes";
+
 import cafeHeroImage from "@assets/ChatGPT Image Aug 9, 2025, 01_32_58 PM_1754739185605.jpg";
 
 export default function Partners() {
@@ -70,10 +72,12 @@ export default function Partners() {
             Turn unused café space into profit — with no upfront cost.
           </p>
           <p className="text-sm md:text-lg text-white mb-4 md:mb-6 drop-shadow-md px-2">
-            Coffee&amp;Prints delivers community-made collectible art prints on consignment. You provide the space, we handle the rest.
+            Coffee&amp;Prints delivers
+            <a href="/catalogue" className="text-[#f1b917] hover:underline transition-colors"> community-made collectible art prints </a>
+            on consignment.
           </p>
           <p className="text-sm md:text-lg text-white mb-4 md:mb-6 drop-shadow-md px-2">
-            Every print sold earns you 30% — about twice the profit of selling a coffee.
+            Sell a print, offer a coffee, keep 30% — about triple the profit of selling the coffee alone.
           </p>
           <div className="text-center">
             <div className="flex flex-col items-center justify-center text-sm text-white drop-shadow-md space-y-2 md:hidden w-full">
@@ -129,54 +133,91 @@ export default function Partners() {
               style={{ width: '280px' }} />
           </div>
         </div>
+
+        <div className="container mx-auto px-4 pt-6 md:pt-12 text-center">
+          <p className="text-base md:text-xl text-white font-bold mb-4 md:mb-6 drop-shadow-md px-2">
+            Take it further
+          </p>
+
+          <p className="text-sm md:text-lg text-white mb-2 md:mb-4 drop-shadow-md px-2">
+            Co-design a signature print style in your brand identity.
+          </p>
+
+          <p className="text-sm md:text-lg text-white mb-4 md:mb-6 drop-shadow-md px-2">
+            Empower your community to create collectible prints in your café's universe, <br />
+            expanding your brand story and creating a new collectible medium.
+          </p>
+        </div>
+
         {/* Bottom content - fixed at bottom */}
-        <div className="container mx-auto px-4 pb-3 md:pb-6 text-center">
-          <p className="text-sm md:text-lg text-white drop-shadow-md mb-3 px-2">Already brewing with us…</p>
-          <div className="flex items-center justify-center mb-4 md:mb-6 overflow-hidden">
-            <div className="flex gap-4 sm:gap-8 md:gap-12 items-center justify-center">
-              <a
-                href="https://www.instagram.com/kiosko_bello/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0">
-                <div className="bg-white rounded-md overflow-hidden flex items-center justify-center h-[clamp(60px,15vw,120px)] w-[clamp(60px,15vw,120px)]" >
-                  <img src="/partners/kiosko-bello.jpg" alt="Kiosko Bello" className="w-full h-full object-cover" />
-                </div>
-              </a>
-              <a
-                href="https://www.caffeyolo.ch/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0">
-                <div className="bg-white rounded-md overflow-hidden flex items-center justify-center h-[clamp(60px,15vw,120px)] w-[clamp(60px,15vw,120px)]" >
-                  <img src="/partners/caffeyolo.jpg" alt="Kiosko Bello" className="w-full h-full object-cover" />
-                </div>
-              </a>
-              <a
-                href="https://www.instagram.com/_coffee_twins_"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0">
-                <div className="bg-white rounded-md overflow-hidden flex items-center justify-center h-[clamp(60px,15vw,120px)] w-[clamp(60px,15vw,120px)]" >
-                  <img src="/partners/coffee-twins.jpg" alt="Kiosko Bello" className="w-full h-full object-cover" />
-                </div>
-              </a>
-              <a
-                href="https://www.instagram.com/papierbeurre/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0">
-                <div className="bg-white rounded-md overflow-hidden flex items-center justify-center h-[clamp(60px,15vw,120px)] w-[clamp(60px,15vw,120px)]" >
-                  <img src="/partners/papier-beurre.jpg" alt="Kiosko Bello" className="w-full h-full object-cover" />
-                </div>
-              </a>
+        <div className="container mx-auto px-4 pt-8 md:pt-16 md:pb-6 text-center">
+          <p className="text-base md:text-lg text-white font-bold mb-4 md:mb-6 drop-shadow-md px-2">Already brewing with us…</p>
+
+          <div className="mb-6 flex justify-center w-full overflow-hidden">
+            <div className="w-full max-w-[600px] overflow-hidden">
+              <div className="flex gap-8 items-center animate-slideLeft" style={{ width: '200%' }}>
+                {/* First set of partners */}
+                {PARTNER_CAFES.map((partner) => (
+                  <a
+                    key={partner.id}
+                    href={partner.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0"
+                    onClick={() => {
+                      trackEvent('Navigation', 'partner_clicked', partner.name);
+                    }}
+                  >
+                    <div
+                      className={`bg-white rounded-md overflow-hidden flex items-center justify-center ${partner.id === 'caffeyolo' ? 'border-2 border-white' : ''}`}
+                      style={{
+                        height: 'clamp(60px, 15vw, 120px)',
+                        width: 'clamp(60px, 15vw, 120px)'
+                      }}
+                    >
+                      <img
+                        src={partner.logo}
+                        alt={partner.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </a>
+                ))}
+                {/* Duplicate set for seamless loop */}
+                {PARTNER_CAFES.map((partner) => (
+                  <a
+                    key={`${partner.id}-duplicate`}
+                    href={partner.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0"
+                    onClick={() => {
+                      trackEvent('Navigation', 'partner_clicked', partner.name);
+                    }}
+                  >
+                    <div
+                      className={`bg-white rounded-md overflow-hidden flex items-center justify-center ${partner.id === 'caffeyolo' ? 'border-2 border-white' : ''}`}
+                      style={{
+                        height: 'clamp(60px, 15vw, 120px)',
+                        width: 'clamp(60px, 15vw, 120px)'
+                      }}
+                    >
+                      <img
+                        src={partner.logo}
+                        alt={partner.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
           <button
             onClick={handleGetStartedClick}
             className="bg-[#f1b917] text-black px-6 py-3 md:px-8 md:py-4 rounded-lg font-bold text-base md:text-lg hover:bg-opacity-90 transition-all"
           >
-            Deliver my free consignment Exhibit
+            Brew with us
           </button>
         </div>
       </main>

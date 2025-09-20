@@ -264,17 +264,6 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Partners</span>
                 )} */}
               </div>
-              
-              {/* Tagline underneath heading for home page */}
-              {!isCataloguePage && !isDashboardPage && !isSettingsPage && !isEarnPage && !isFeedPage && !isPartnersPage && !isCreatePage && (
-                <div className="mt-3">
-                  <p className="text-white font-bold text-sm sm:text-base md:text-lg tracking-[0.2em] text-center whitespace-nowrap">
-                    From moments to masterpieces
-                  </p>
-                </div>
-              )}
-
-
             </div>
           )}
           

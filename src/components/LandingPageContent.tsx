@@ -3,7 +3,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'wouter';
 
 // Updated slideshow media - first item is Ferrari video, second is red pop art Ferrari
-import { SLIDESHOW_MEDIA } from "@/lib/slideshowMedia";
+import { SLIDESHOW_MEDIA } from "@/data/slideshowMedia";
+import { PARTNER_CAFES } from '@/data/partner-cafes';
 
 export default function LandingPageContent() {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -86,31 +87,73 @@ export default function LandingPageContent() {
 
       {/* Landing page text */}
       <div className="mb-6 flex flex-col items-center justify-center w-full">
+      <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap mb-1">
+          Turn photos into collectible prints
+        </p>
         <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap mb-1">
-          Turn great moments into collectible prints.
+          and monetize your moments.
         </p>
         <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap">
-          Get featured in one of our partnered cafés.
+          Get featured in cafés.
         </p>
       </div>
       <div className="mb-6 flex justify-center w-full overflow-hidden">
-        <div className="w-[80%] sm:w-full max-w-[350px] flex justify-center items-center" style={{ width: 'calc(386px)' }}>
-          <div className="flex gap-4 sm:gap-8 md:gap-16 items-center justify-center">
-            <a href="https://www.instagram.com/kiosko_bello/" target="_blank" rel="noopener noreferrer" className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0">
-              <div className="bg-white rounded-md overflow-hidden flex items-center justify-center" style={{ height: 'clamp(60px, 15vw, 120px)', width: 'clamp(60px, 15vw, 120px)' }}>
-                <img src="/partners/kiosko-bello.jpg" alt="Kiosko Bello" className="w-full h-full object-cover" />
-              </div>
-            </a>
-            <a href="https://www.instagram.com/caffeyolo_luzern" target="_blank" rel="noopener noreferrer" className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0">
-              <div className="bg-white rounded-md overflow-hidden flex items-center justify-center" style={{ height: 'clamp(60px, 15vw, 120px)', width: 'clamp(60px, 15vw, 120px)' }}>
-                <img src="/partners/caffeyolo.jpg" alt="Caffèyolo" className="w-full h-full object-cover" />
-              </div>
-            </a>
-            <a href="https://www.instagram.com/_coffee_twins_" target="_blank" rel="noopener noreferrer" className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0">
-              <div className="bg-white rounded-md overflow-hidden flex items-center justify-center" style={{ height: 'clamp(60px, 15vw, 120px)', width: 'clamp(60px, 15vw, 120px)' }}>
-                <img src="/partners/coffee-twins.jpg" alt="Coffee Twins" className="w-full h-full object-cover" />
-              </div>
-            </a>
+        <div className="w-full max-w-[600px] overflow-hidden">
+          <div className="flex gap-8 items-center animate-slideLeft" style={{ width: '200%' }}>
+            {/* First set of partners */}
+            {PARTNER_CAFES.map((partner) => (
+              <a
+                key={partner.id}
+                href={partner.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0"
+                onClick={() => {
+                  trackEvent('Navigation', 'partner_clicked', partner.name);
+                }}
+              >
+                <div 
+                  className={`bg-white rounded-md overflow-hidden flex items-center justify-center ${partner.id === 'caffeyolo' ? 'border-2 border-white' : ''}`}
+                  style={{ 
+                    height: 'clamp(60px, 15vw, 120px)', 
+                    width: 'clamp(60px, 15vw, 120px)' 
+                  }}
+                >
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </a>
+            ))}
+            {/* Duplicate set for seamless loop */}
+            {PARTNER_CAFES.map((partner) => (
+              <a
+                key={`${partner.id}-duplicate`}
+                href={partner.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block hover:opacity-80 transition-opacity duration-200 flex-shrink-0"
+                onClick={() => {
+                  trackEvent('Navigation', 'partner_clicked', partner.name);
+                }}
+              >
+                <div 
+                  className={`bg-white rounded-md overflow-hidden flex items-center justify-center ${partner.id === 'caffeyolo' ? 'border-2 border-white' : ''}`}
+                  style={{ 
+                    height: 'clamp(60px, 15vw, 120px)', 
+                    width: 'clamp(60px, 15vw, 120px)' 
+                  }}
+                >
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       </div>

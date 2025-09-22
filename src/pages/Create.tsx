@@ -442,7 +442,7 @@ export default function Create() {
                                 {/* Subheading for style selection - only show when styles are visible */}
                                 {showStyles && (
                                   <h3 className="text-white text-xl font-racing-sans text-center mb-4">
-                                    Scroll to pick a poster style
+                                    Scroll to pick a print style
                                   </h3>
                                 )}
       

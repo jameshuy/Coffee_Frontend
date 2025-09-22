@@ -14,32 +14,49 @@ export function constructPrompt(styleId: string, feelingIds: string[]): string {
   }
 
   // Filter out empty feeling slots
-  const validFeelingIds = feelingIds.filter((id) => id && id.trim() !== "");
-  const selectedFeelings = validFeelingIds.map((id) => {
-    const feeling = FEELINGS.find((f) => f.id === id);
-    if (!feeling) {
-      throw new Error(`Feeling not found: ${id}`);
-    }
-    return feeling;
-  });
+  let prompt = `STYLE TRANSFER — ICONIC POSTER (Hero Cluster v1)
 
-  let prompt = `Create a poster of the first image. Use the second image strictly as a reference for the ${style.name} style. Apply its visual characteristics— ${style.traits} —to the first image. Do not use or replicate any content, objects, layout, forms, or shapes from the second image. Preserve the exact subject, composition, and proportions of the first image only. This is a style transfer. Do not reinterpret the subject. Do not merge scenes. Do not borrow geometry or elements like houses, buildings, mountains, clouds, or terrain features from the second image. Do not add any borders, frames, or text.\n`;
+Source = FIRST image (LOCK composition & native subject proportions; analyze but do not invent).
+Style = SECOND image (REFERENCE FOR SURFACE ONLY): ${style.name}.
 
-  if (selectedFeelings.length > 0) {
-    prompt += `Enrich the image with subtle influence from the following emotional directions. These should enhance the style without disrupting the original photo's structure or overpowering the chosen style:\n`;
+SURFACE LANGUAGE (FROM STYLE, NOT CONTENT):
+${style.traits}
 
-    if (selectedFeelings[0]) {
-      prompt += `1. ${selectedFeelings[0].name} –  ${selectedFeelings[0].traits}\n`;
-    }
-    if (selectedFeelings[1]) {
-      prompt += `2. ${selectedFeelings[1].name} – ${selectedFeelings[1].traits}\n`;
-    }
-    if (selectedFeelings[2]) {
-      prompt += `3. ${selectedFeelings[2].name} – ${selectedFeelings[2].traits}\n`;
-    }
-  }
+COLOR DISCIPLINE:
+• Cap palette to ${style.palette}; quantize to ≤ ${style.iconic?.maxHues ?? 4} dominant hues.
+• CMYK-friendly tones only; avoid neon clipping/banding.
 
-  prompt += `Render the final output as a high-quality, print-ready poster in A3 aspect ratio (297 × 420 mm). Apply visual textures and finishes reminiscent of professional art print methods—such as risograph layering, halftone ink, screenprint overlays, or matte paper surface—to emphasize physical materiality and gallery-grade production.`;
+EDGE & TEXTURE LANGUAGE:
+• Edge language: ${style.edgeRule}.
+• Print finish cues: ${style.printFinish}.
+
+ICONIC COMPOSITION LOCKS (NO NEW OBJECTS):
+• Hero lock: Identify 2–3 (max 4) most distinct aspects from the source. Keep only those as Heroes; reduce all else.
+• Hero cluster scale: Together Heroes should occupy ~55–70% of canvas height.
+• Reduction: Flatten shading into halftone + bold fills; prune features < ${style.iconic?.minDetailPx ?? 12}px.
+• Silhouette priority: Heroes must read as bold comic silhouettes.
+• Balance: Heroes must form a playful, high-contrast cluster.
+• Large quiet negative space is desirable.
+
+PAPER-WHITE & BACKGROUND:
+• Empty zones must be pure #FFFFFF with no halftone/tint.
+• Full-bleed output; no fabricated borders or frames.
+
+STRICT NEGATIVE (HARD REFUSALS):
+• No new objects, text, logos, signatures, overlays, gradients, or pattern fills.
+• No AI artifacts: double outlines, melted forms, speckling.
+
+QUALITY SAFEGUARDS:
+• Stamp test: Heroes recognizable at 128 px.
+• Palette compliance: ≤ ${style.iconic?.maxHues ?? 4} hues; extras collapse to listed ones.
+• Paper-white check: background must be exact #FFFFFF.
+• Edge cleanliness: contours must remain sharp, no speckle.
+
+OUTPUT SPECS:
+• A3 (297×420 mm), 300 DPI, borderless.
+• Deliver a clean, gallery-grade print-ready poster.`;
 
   return prompt;
 }
+
+

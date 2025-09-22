@@ -29,10 +29,10 @@ export default function PolicyModal({ title, children, triggerText }: PolicyModa
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold mb-4">{title}</DialogTitle>
+          <DialogTitle className="text-xl font-bold mb-4 text-white">{title}</DialogTitle>
         </DialogHeader>
         {/* Using div instead of DialogDescription to avoid nesting issues */}
-        <div className="text-gray-700">
+        <div className="text-white opacity-80">
           {children}
         </div>
       </DialogContent>

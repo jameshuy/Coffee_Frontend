@@ -294,7 +294,7 @@ export function StyleSelector({
                   >
                     <div className="relative flex items-center justify-center w-full h-full bg-black p-0">
                       <img
-                        src={getStyleThumbnailPath(style.id)}
+                        src={import.meta.env.VITE_API_URL + getStyleThumbnailPath(style.id)}
                         alt={style.name}
                         className="w-full h-full object-cover"
                         style={{ pointerEvents: 'auto' }}

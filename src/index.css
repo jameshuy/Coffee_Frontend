@@ -5,6 +5,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-color: black;
+}
+
 @layer utilities {
   /* Hide scrollbar but still allow scrolling */
   .no-scrollbar {

@@ -223,9 +223,9 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                       <User size={24} />
                     </NavIcon>
                     
-                    <NavIcon href="/settings" active={isSettingsPage}>
+                    {/* <NavIcon href="/settings" active={isSettingsPage}>
                       <Settings size={24} />
-                    </NavIcon>
+                    </NavIcon> */}
                     
                     <button
                       onClick={logout}

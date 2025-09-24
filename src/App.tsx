@@ -29,7 +29,7 @@ function Router() {
       <Route path="/feed" component={Feed} />
       <Route path="/catalogue" component={Catalogue} />
       <Route path="/dashboard" component={Dashboard} />
-      <Route path="/settings" component={Settings} />
+      {/* <Route path="/settings" component={Settings} /> */}
       <Route path="/earn" component={Earn} />
       <Route path="/partners" component={Partners} />
       <Route path="/restock">

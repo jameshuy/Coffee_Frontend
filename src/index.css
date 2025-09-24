@@ -73,7 +73,7 @@ body {
   }
   
   .animate-slideLeft {
-    animation: slideLeft 30s linear infinite;
+    animation: slideLeft 15s linear infinite;
   }
   
 }

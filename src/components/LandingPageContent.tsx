@@ -66,6 +66,8 @@ export default function LandingPageContent() {
                 style={{ backgroundColor: 'black', userSelect: 'none' }}
                 muted
                 playsInline
+                autoPlay
+                controls={false}
                 onContextMenu={(e) => e.preventDefault()}
               />
             ) : (

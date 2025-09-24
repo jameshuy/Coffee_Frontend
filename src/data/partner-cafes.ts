@@ -35,5 +35,11 @@ export const PARTNER_CAFES:PartnerCafeItem[] = [
     name: 'United Tastes',
     logo: '/partners/united-tastes.jpg',
     link: 'https://united-tastes.poush-dev.be/'
+  },
+  {
+    id: 'alfred-caffebar',
+    name: 'Alfred Caffeebar',
+    logo: '/partners/alfred-caffebar.jpg',
+    link: 'https://www.instagram.com/alfred_caffebar/'
   }
 ];

@@ -45,6 +45,7 @@ const ShareModal = ({ isOpen, onClose, imageUrl, shareContext = 'dashboard', pos
   }, []);
   
   // Handle native sharing via Web Share API
+
   const handleNativeShare = async () => {
     if (!imageUrl) return;
     
@@ -91,7 +92,17 @@ const ShareModal = ({ isOpen, onClose, imageUrl, shareContext = 'dashboard', pos
       }
       
       // Trigger native sharing
-      await navigator.share(shareData);
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: "SHARE",
+          ...shareData,
+        }));
+        return;
+      }
+
+      if (navigator.share) {
+        await navigator.share(shareData)
+      }
       trackEvent("Share", "native_share_success");
       
       // Close the modal after successful share

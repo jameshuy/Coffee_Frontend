@@ -77,7 +77,8 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
     }
   }, [username]);
 
-  const handleSendVerification = useCallback(async () => {
+  const handleSendVerification = async () => {
+
     if (!email || !username || !password || !confirmPassword) {
       toast({
         title: "Missing information",
@@ -114,33 +115,34 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
       return;
     }
 
-    const response = await apiRequest("POST", "/api/send-verification", { email });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to send verification email");
-    }
-    console.log(response)
-    return response;
-  }, [email, username, password, confirmPassword, toast, usernameAvailable]);
+    setIsLoading(true);
 
-  const sendVerificationAsync = useAsync(handleSendVerification, {
-    onSuccess: async () => {
+    try {
+      const response = await apiRequest("POST", "/api/send-verification", { email });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to send verification email");
+      }
+
       toast({
         title: "Verification code sent",
         description: "Please check your email for the verification code.",
         variant: "default",
       });
+
       setStep("verification");
-    },
-    onError: (error) => {
+    } catch (error) {
       console.error("Verification email error:", error);
       toast({
         title: "Failed to send verification",
         description: error instanceof Error ? error.message : "An error occurred sending the verification code",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleVerifyAndRegister = useCallback(async () => {
     console.log("handleVerifyAndRegister")
@@ -208,7 +210,7 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100%-1rem)] max-w-[420px] sm:max-w-[425px] bg-black border-[#f1b917] text-white">
-        <ModalHeader 
+        <ModalHeader
           title={step === "verification" ? "Verify Your Email" : "Sign Up"}
           description={step === "verification" ? `We've sent a 6-digit verification code to ${email}. Please check your inbox and enter the code below:` : ""}
         />
@@ -241,17 +243,16 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
                     setUsername(value);
                   }}
                   placeholder="Enter username (5-20 characters)"
-                  className={`bg-gray-900 border-gray-700 text-white pr-8 ${
-                    username.length >= 5 && username.length <= 20
+                  className={`bg-gray-900 border-gray-700 text-white pr-8 ${username.length >= 5 && username.length <= 20
                       ? usernameAvailable === true
                         ? 'border-green-500'
                         : usernameAvailable === false
-                        ? 'border-red-500'
-                        : 'border-yellow-500'
+                          ? 'border-red-500'
+                          : 'border-yellow-500'
                       : username.length > 0
-                      ? 'border-red-500'
-                      : ''
-                  }`}
+                        ? 'border-red-500'
+                        : ''
+                    }`}
                 />
                 {username.length >= 5 && username.length <= 20 && (
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -344,7 +345,7 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
                   required
                 />
               </div>
-              
+
               <div className="text-center">
                 <button
                   type="button"
@@ -365,16 +366,16 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
               <Button
                 variant="outline_white"
                 onClick={() => onOpenChange(false)}
-                disabled={sendVerificationAsync.isLoading}
+                disabled={isLoading}
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 variant="primary"
-                onClick={() => sendVerificationAsync.execute()} 
-                disabled={sendVerificationAsync.isLoading}
+                onClick={handleSendVerification}
+                disabled={isLoading}
               >
-                {sendVerificationAsync.isLoading ? (
+                {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Sending...
@@ -389,13 +390,13 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
             </>
           ) : (
             <>
-              <Button 
+              <Button
                 variant="outline_white"
                 onClick={() => setStep("form")}
               >
                 Back
               </Button>
-              <Button 
+              <Button
                 variant="primary"
                 onClick={() => verifyAndRegisterAsync.execute()}
                 disabled={verifyAndRegisterAsync.isLoading || verificationCode.length !== 6}

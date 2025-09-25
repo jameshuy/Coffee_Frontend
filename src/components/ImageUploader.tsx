@@ -493,7 +493,7 @@ export default function ImageUploader({
           {...((!isGenerated && !isGenerating) ? getRootProps() : {})} 
           className={`absolute inset-0 border-0 ${isDragActive ? 'bg-gray-100' : 'bg-secondary'} rounded-lg ${(!isGenerated && !isGenerating) ? 'cursor-pointer hover:bg-gray-100' : ''} transition-all ${isGenerated ? 'bg-opacity-90' : ''}`}
         >
-          {(!isGenerated && !isGenerating) && <input {...getInputProps()} />}
+          {(!isGenerated && !isGenerating) && <input {...getInputProps()} capture="environment" />}
           
           {!uploadedImage ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">

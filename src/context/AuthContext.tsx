@@ -60,6 +60,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (response.ok) {
         const data = await response.json();
+        localStorage.setItem("auth_token", data.token);
         setUser(data.user);
         return true;
       } else {
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await apiRequest('POST', '/api/auth/logout');
       setUser(null);
       // Clear local storage
+      localStorage.removeItem("auth_token");
       localStorage.removeItem('posterTheMoment_verifiedEmail');
       // Force page refresh with cache busting to clear any cached state
       window.location.href = '/?t=' + Date.now();

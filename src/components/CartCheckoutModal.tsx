@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { XCircle, Trash2, ShoppingCart, Check, ArrowLeft, RotateCcw, ChevronUp, ChevronDown } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useCart } from "@/context/CartContext";
@@ -253,13 +253,7 @@ export default function CartCheckoutModal({
         <div className="relative w-full h-full flex flex-col items-center p-4">
           {/* Close button - only show in cart view or after order completion */}
           {(currentStep === "cart" || currentStep === "confirmation") && (
-            <button
-              onClick={onClose}
-              className="absolute top-2 right-2 text-gray-400 hover:text-white z-50"
-              aria-label="Close"
-            >
-              <XCircle size={24} />
-            </button>
+            <DialogClose className="absolute top-2 right-2 text-gray-400 hover:text-white z-50" onClick={onClose}></DialogClose>
           )}
           
           {/* Back button - only show during shipping & payment steps */}

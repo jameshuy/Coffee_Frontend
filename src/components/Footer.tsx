@@ -22,7 +22,7 @@ export default function Footer({ showTopLine = false, transparent = false }: Foo
             <PolicyModal 
               title="Privacy Policy" 
               triggerText={
-                <span className="text-white hover:text-opacity-80 transition-all text-[10px] tracking-[0.15em]">
+                <span className="text-white hover:text-opacity-80 transition-all text-[10px] tracking-[0.15em] opacity-70">
                   Privacy Policy
                 </span>
               }

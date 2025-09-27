@@ -19,6 +19,7 @@ interface UserImage {
   createdAt: string;
   isPublic: boolean;
   isSaved: boolean;
+  validate: boolean;
 }
 
 export default function Dashboard() {
@@ -43,7 +44,7 @@ export default function Dashboard() {
   const closeImageModal = () => {
     setSelectedImage(null);
   };
-  
+
   // Fetch user's generated images (only if authenticated)
   const { data: userImages, isLoading: imagesLoading } = useQuery<{ images: UserImage[] }>({
     queryKey: ['/api/user-images', user?.email],
@@ -81,10 +82,10 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       <Navigation />
-      
+
       <main className="flex-grow container mx-auto px-4 pt-1 pb-6 relative">
 
-        
+
         {/* User's generated images grid */}
         {imagesLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -114,18 +115,18 @@ export default function Dashboard() {
                 onOpenSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
               />
             )}
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {userImages.images.map((image) => (
-                <div 
-                  key={image.id} 
+                image.validate && <div
+                  key={image.id}
                   className="poster-tile cursor-pointer"
                   onClick={() => openImageModal(image)}
                 >
                   <div className="w-full bg-black" style={{ aspectRatio: '1/1.414' }}>
                     <div className="w-full h-full relative group hover:outline hover:outline-[12px] hover:outline-white transition-all duration-300">
-                      <img 
-                        src={import.meta.env.VITE_API_URL + image.imageUrl} 
+                      <img
+                        src={import.meta.env.VITE_API_URL + image.imageUrl}
                         alt={`Poster with ${image.style} style`}
                         className="w-full h-full object-fill transition-all duration-300 select-none pointer-events-none"
                         loading="lazy"
@@ -154,13 +155,13 @@ export default function Dashboard() {
           </div>
         )}
       </main>
-      
+
       <Footer showTopLine={true} />
 
 
 
       {/* Share Modal */}
-      <ShareModal 
+      <ShareModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         imageUrl={shareImageUrl}

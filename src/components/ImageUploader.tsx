@@ -33,13 +33,13 @@ interface ImageUploaderProps {
 const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024; // 10MB for images
 const MAX_VIDEO_DURATION = 10; // seconds
 
-export default function ImageUploader({ 
-  onImageUpload, 
+export default function ImageUploader({
+  onImageUpload,
   onVideoUpload,
-  uploadedImage, 
+  uploadedImage,
   uploadedVideo,
   videoFrameData = null,
-  isGenerated = false, 
+  isGenerated = false,
   isGenerating = false,
   isUploadingVideo = false,
   onTextAdd,
@@ -57,7 +57,7 @@ export default function ImageUploader({
   const containerRef = useRef<HTMLDivElement>(null);
   const posterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
-  
+
   // Calculate and update container height based on viewport
   useEffect(() => {
     const calculateHeight = () => {
@@ -66,13 +66,13 @@ export default function ImageUploader({
         // A3 aspect ratio is 1:1.414 (portrait)
         const maxViewportHeight = window.innerHeight * 0.8; // Use 80% of viewport height
         const maxWidth = isMobile ? window.innerWidth * 0.95 : window.innerWidth * 0.65; // Use less width on mobile
-        
+
         // Calculate height based on A3 aspect ratio (width / 0.707)
         const heightBasedOnWidth = maxWidth / 0.707;
-        
+
         // Use the smaller of the two to ensure it fits on screen
         const optimalHeight = Math.min(maxViewportHeight, heightBasedOnWidth);
-        
+
         setContainerHeight(optimalHeight);
       } else {
         // For initial upload state, use the same size as the video box (350px max-width)
@@ -80,11 +80,11 @@ export default function ImageUploader({
         setContainerHeight(495);
       }
     };
-    
+
     // Calculate initially and on resize
     calculateHeight();
     window.addEventListener('resize', calculateHeight);
-    
+
     return () => {
       window.removeEventListener('resize', calculateHeight);
       // Clean up any pending poster timeout
@@ -94,14 +94,14 @@ export default function ImageUploader({
       }
     };
   }, [isMobile, isGenerated]);
-  
+
   // Reset image loaded state when generation starts, but preserve state when showing a generated image
   useEffect(() => {
     if (isGenerating) {
       setGeneratedImageLoaded(false);
     }
   }, [isGenerating]);
-  
+
   // Ensure generated state is properly applied when the component switches to isGenerated=true
   // Also handle merged videos for video uploads
   useEffect(() => {
@@ -120,7 +120,7 @@ export default function ImageUploader({
       const url = URL.createObjectURL(uploadedVideo);
       setVideoObjectUrl(url);
       setShowVideoTransition(true);
-      
+
       return () => {
         URL.revokeObjectURL(url);
         setVideoObjectUrl(null);
@@ -139,7 +139,7 @@ export default function ImageUploader({
       setShowVideoTransition(true);
     }
   }, [isGenerated, uploadedVideo, isGenerating]);
-  
+
   // Animation is now handled by the className and css transition properties
 
   // Auto-scroll function to position image at top of viewport
@@ -170,15 +170,15 @@ export default function ImageUploader({
     });
 
     setIsLoading(true);
-    
+
     try {
       // Create video element to check duration
       const video = document.createElement('video');
       const videoUrl = URL.createObjectURL(file);
-      
+
       video.src = videoUrl;
       video.preload = 'metadata';
-      
+
       await new Promise((resolve, reject) => {
         video.onloadedmetadata = () => {
           console.log("VIDEO METADATA:", {
@@ -186,7 +186,7 @@ export default function ImageUploader({
             videoWidth: video.videoWidth,
             videoHeight: video.videoHeight
           });
-          
+
           // Check duration limit
           if (video.duration > MAX_VIDEO_DURATION) {
             const durationSeconds = Math.round(video.duration);
@@ -197,20 +197,20 @@ export default function ImageUploader({
               variant: "destructive",
               duration: 5000
             });
-            
+
             URL.revokeObjectURL(videoUrl);
             setIsLoading(false);
-            
+
             if (onImageError) {
               onImageError();
             }
             reject(new Error('Video too long'));
             return;
           }
-          
+
           resolve(null);
         };
-        
+
         video.onerror = () => {
           trackEvent('Video', 'upload_error', 'metadata_load_failed');
           toast({
@@ -219,28 +219,28 @@ export default function ImageUploader({
             variant: "destructive",
             duration: 5000
           });
-          
+
           URL.revokeObjectURL(videoUrl);
           setIsLoading(false);
-          
+
           if (onImageError) {
             onImageError();
           }
           reject(new Error('Video load failed'));
         };
       });
-      
+
       // Video is valid, call the upload handler
       trackEvent('Video', 'upload_success', file.type);
-      
+
       if (onVideoUpload) {
         onVideoUpload(file);
       }
-      
+
       // Clean up
       URL.revokeObjectURL(videoUrl);
       setIsLoading(false);
-      
+
     } catch (error) {
       console.error("Error processing video:", error);
       setIsLoading(false);
@@ -251,11 +251,11 @@ export default function ImageUploader({
     // Handle rejected files (larger than 8MB or wrong type)
     if (rejectedFiles && rejectedFiles.length > 0) {
       const rejectedFile = rejectedFiles[0];
-      
+
       // Check rejection reasons and provide specific error messages
       if (rejectedFile.errors && rejectedFile.errors.length > 0) {
         const error = rejectedFile.errors[0];
-        
+
         // File size error (only applies to images now)
         if (error.code === 'file-too-large') {
           const sizeMB = (rejectedFile.file.size / (1024 * 1024)).toFixed(1);
@@ -266,12 +266,12 @@ export default function ImageUploader({
             variant: "destructive",
             duration: 5000
           });
-          
+
           // Call the onImageError callback if provided
           if (onImageError) {
             onImageError();
           }
-        } 
+        }
         // File type error
         else if (error.code === 'file-invalid-type') {
           trackImageUpload(false, `Invalid file type: ${rejectedFile.file.type || 'unknown'}`);
@@ -281,7 +281,7 @@ export default function ImageUploader({
             variant: "destructive",
             duration: 5000
           });
-          
+
           // Call the onImageError callback if provided
           if (onImageError) {
             onImageError();
@@ -296,7 +296,7 @@ export default function ImageUploader({
             variant: "destructive",
             duration: 5000
           });
-          
+
           // Call the onImageError callback if provided
           if (onImageError) {
             onImageError();
@@ -305,20 +305,20 @@ export default function ImageUploader({
       }
       return;
     }
-    
+
     if (acceptedFiles && acceptedFiles[0]) {
       const file = acceptedFiles[0];
-      
+
       // Track that a file was dropped/selected
       trackEvent('Image', 'upload_attempt', file.type);
-      
+
       // Check if it's a video or image file and handle accordingly
       if (file.type.startsWith('video/')) {
         // Handle video upload
         handleVideoFile(file);
         return;
       }
-      
+
       // For images, check file size
       if (file.size > MAX_IMAGE_FILE_SIZE) {
         trackImageUpload(false, 'File size exceeded 10MB limit');
@@ -329,17 +329,17 @@ export default function ImageUploader({
         });
         return;
       }
-      
+
       console.log("FILE INFO (Client):", {
         fileName: file.name,
         fileType: file.type,
         fileSize: file.size,
         lastModified: new Date(file.lastModified).toISOString()
       });
-      
+
       setIsLoading(true);
       const reader = new FileReader();
-      
+
       reader.onload = (e) => {
         setIsLoading(false);
         if (e.target?.result) {
@@ -348,7 +348,7 @@ export default function ImageUploader({
             dataUrlLength: dataUrl.length,
             dataUrlPrefix: dataUrl.substring(0, 50) + "...",
           });
-          
+
           // Validate image data before proceeding
           if (!dataUrl.startsWith('data:image/')) {
             trackImageUpload(false, 'Invalid image data format');
@@ -360,17 +360,17 @@ export default function ImageUploader({
             });
             return;
           }
-          
+
           // Create a debugger image element to verify image loading and dimensions
           const img = new Image();
-          
+
           img.onload = () => {
             console.log("CLIENT IMAGE DIMENSIONS:", {
               width: img.width,
               height: img.height,
               aspectRatio: (img.width / img.height).toFixed(2)
             });
-            
+
             // Check if image dimensions are too small
             if (img.width < 300 || img.height < 300) {
               trackImageUpload(false, `Image too small: ${img.width}x${img.height}`);
@@ -382,17 +382,17 @@ export default function ImageUploader({
               });
               // Still proceed with the small image
             }
-            
+
             // Track successful image upload
             trackImageUpload(true);
-            
+
             // Process the image
             onImageUpload(dataUrl);
-            
+
             // Trigger auto-scroll after image is loaded
             scrollToImageTop();
           };
-          
+
           img.onerror = () => {
             trackImageUpload(false, 'Image loading error');
             toast({
@@ -402,7 +402,7 @@ export default function ImageUploader({
               duration: 5000
             });
           };
-          
+
           img.src = dataUrl;
         } else {
           trackImageUpload(false, 'No image data in FileReader result');
@@ -413,15 +413,15 @@ export default function ImageUploader({
           });
         }
       };
-      
+
       reader.onerror = (error) => {
         setIsLoading(false);
         console.error("File Reader Error:", error);
-        
+
         // Track file read error with more details if available
         const errorMessage = error?.target?.error?.message || 'Unknown FileReader error';
         trackImageUpload(false, `FileReader error: ${errorMessage}`);
-        
+
         toast({
           title: "Upload Error",
           description: "There was a problem processing your image. The file might be corrupted or too complex to process. Please try a different image.",
@@ -429,20 +429,20 @@ export default function ImageUploader({
           duration: 5000
         });
       };
-      
+
       // Add a timeout to handle cases where the FileReader gets stuck
       const timeoutId = setTimeout(() => {
         if (isLoading) {
           setIsLoading(false);
           trackImageUpload(false, 'FileReader timeout');
-          
+
           toast({
             title: "Upload Timeout",
             description: "Your image is taking too long to process. It might be too large or complex. Please try a smaller or simpler image.",
             variant: "destructive",
             duration: 5000
           });
-          
+
           // Abort the file read operation if possible
           try {
             reader.abort();
@@ -451,12 +451,12 @@ export default function ImageUploader({
           }
         }
       }, 15000); // 15 second timeout
-      
+
       // Clean up the timeout when the operation completes
       reader.onloadend = () => {
         clearTimeout(timeoutId);
       };
-      
+
       // DO NOT MODIFY! Use readAsDataURL exactly as is
       reader.readAsDataURL(file);
     }
@@ -472,11 +472,23 @@ export default function ImageUploader({
     multiple: false
     // Remove maxSize limit for videos
   });
+  // Camera input handler
+  const handleCameraInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onDrop([file], []);
+    e.target.value = ''; // reset to allow next capture
+  };
 
+  // Library input handler
+  const handleLibraryInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onDrop([file], []);
+    e.target.value = ''; // reset
+  };
   return (
     <div className="ImageUploader w-full mx-auto flex justify-center items-center transition-all duration-500 ease-in-out" style={{ maxWidth: isGenerated ? 'none' : '350px' }}>
       {/* Dynamic sized container with A3 aspect ratio */}
-      <div 
+      <div
         ref={containerRef}
         className="relative mx-auto"
         style={{
@@ -489,170 +501,192 @@ export default function ImageUploader({
         }}
       >
         {/* Dropzone for uploading images */}
-        <div 
-          {...((!isGenerated && !isGenerating) ? getRootProps() : {})} 
-          className={`absolute inset-0 border-0 ${isDragActive ? 'bg-gray-100' : 'bg-secondary'} rounded-lg ${(!isGenerated && !isGenerating) ? 'cursor-pointer hover:bg-gray-100' : ''} transition-all ${isGenerated ? 'bg-opacity-90' : ''}`}
-        >
-          {(!isGenerated && !isGenerating) && <input {...getInputProps()} capture="environment" />}
-          
-          {!uploadedImage ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-              <Button type="button" className="px-5 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-base">
-                Tap to upload Photo or Clip
+
+
+        {!uploadedImage ? (
+          <div
+            {...((!isGenerated && !isGenerating) ? getRootProps() : {})}
+            className={`absolute inset-0 border-0 ${isDragActive ? 'bg-gray-100' : 'bg-secondary'} rounded-lg ${(!isGenerated && !isGenerating) ? 'cursor-pointer hover:bg-gray-100' : ''} transition-all ${isGenerated ? 'bg-opacity-90' : ''}`}
+          >
+            <input {...getInputProps()} capture="environment" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center gap-2">
+              {
+                isMobile && (
+                  <Button onClick={(e) => { e.stopPropagation(); document.getElementById('cameraInput')?.click() }} className='w-full inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-5 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-base'>
+                    Take Photo
+                  </Button>
+                )
+              }
+              <Button onClick={(e) => { e.stopPropagation(); document.getElementById('libraryInput')?.click() }} className='w-full inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-5 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-base'>
+                Upload from Library
               </Button>
               <p className="mt-4 text-sm text-gray-600">Images: JPG, PNG (max 10MB)</p>
               <p className="mt-1 text-sm text-gray-600">Videos: MP4, MOV, WebM (max 10 seconds)</p>
             </div>
-          ) : (
-            <div className="absolute inset-0 transition-opacity duration-500">
-              {/* Show merged video if available and original upload was video, otherwise show image */}
-              <div 
-                className="relative w-full h-full overflow-hidden rounded-lg"
-                style={{
-                  border: isGenerated ? '30px solid white' : 'none'
-                }}>
-                {/* Show video with poster transition at selected frame */}
-                {showVideoTransition && videoObjectUrl && uploadedVideo ? (
-                  <div className="relative w-full h-full">
-                    {/* Base video that loops */}
-                    <video 
-                      ref={videoRef}
-                      src={videoObjectUrl}
-                      className={`w-full h-full object-cover transition-all duration-1000 ease-in-out ${
-                        isGenerating ? 'opacity-60' : 'opacity-100'
+          </div>
+        ) : (
+          <div className="absolute inset-0 transition-opacity duration-500">
+            {/* Show merged video if available and original upload was video, otherwise show image */}
+            <div
+              className="relative w-full h-full overflow-hidden rounded-lg"
+              style={{
+                border: isGenerated ? '30px solid white' : 'none'
+              }}>
+              {/* Show video with poster transition at selected frame */}
+              {showVideoTransition && videoObjectUrl && uploadedVideo ? (
+                <div className="relative w-full h-full">
+                  {/* Base video that loops */}
+                  <video
+                    ref={videoRef}
+                    src={videoObjectUrl}
+                    className={`w-full h-full object-cover transition-all duration-1000 ease-in-out ${isGenerating ? 'opacity-60' : 'opacity-100'
                       }`}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      onLoadedData={() => {
-                        console.log('Video transition loaded in DOM');
-                      }}
-                      onTimeUpdate={() => {
-                        // Show poster overlay for exactly 3 seconds after selected frame
-                        if (videoRef.current && videoFrameData && isGenerated && !isGenerating) {
-                          const currentTime = videoRef.current.currentTime;
-                          const targetTime = videoFrameData.timestamp;
-                          const posterDisplayDuration = 3; // Always show poster for 3 seconds
-                          
-                          const posterOverlay = document.getElementById('poster-overlay');
-                          if (posterOverlay) {
-                            // Show poster from targetTime to targetTime + 3 seconds
-                            const posterEndTime = targetTime + posterDisplayDuration;
-                            
-                            if (currentTime >= targetTime && currentTime < posterEndTime) {
-                              // Show poster during the 3-second window
-                              if (posterOverlay.style.opacity !== '1') {
-                                console.log(`🎬 Poster fade-in at ${currentTime.toFixed(1)}s for 3 seconds`);
-                                posterOverlay.style.opacity = '1';
-                              }
-                              
-                              // Pause video at target time to show poster for 3 seconds
-                              if (Math.abs(currentTime - targetTime) < 0.1 && !videoRef.current.paused) {
-                                console.log(`🎬 Pausing video at ${currentTime.toFixed(1)}s for 3-second poster display`);
-                                videoRef.current.pause();
-                                setTimeout(() => {
-                                  if (videoRef.current && !videoRef.current.ended) {
-                                    console.log(`🎬 Resuming video after 3-second poster display`);
-                                    videoRef.current.play();
-                                  }
-                                }, posterDisplayDuration * 1000);
-                              }
-                            } else {
-                              // Hide poster outside the 3-second window
-                              if (posterOverlay.style.opacity !== '0') {
-                                console.log(`🎬 Hiding poster at ${currentTime.toFixed(1)}s`);
-                                posterOverlay.style.opacity = '0';
-                              }
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    onLoadedData={() => {
+                      console.log('Video transition loaded in DOM');
+                    }}
+                    onTimeUpdate={() => {
+                      // Show poster overlay for exactly 3 seconds after selected frame
+                      if (videoRef.current && videoFrameData && isGenerated && !isGenerating) {
+                        const currentTime = videoRef.current.currentTime;
+                        const targetTime = videoFrameData.timestamp;
+                        const posterDisplayDuration = 3; // Always show poster for 3 seconds
+
+                        const posterOverlay = document.getElementById('poster-overlay');
+                        if (posterOverlay) {
+                          // Show poster from targetTime to targetTime + 3 seconds
+                          const posterEndTime = targetTime + posterDisplayDuration;
+
+                          if (currentTime >= targetTime && currentTime < posterEndTime) {
+                            // Show poster during the 3-second window
+                            if (posterOverlay.style.opacity !== '1') {
+                              console.log(`🎬 Poster fade-in at ${currentTime.toFixed(1)}s for 3 seconds`);
+                              posterOverlay.style.opacity = '1';
+                            }
+
+                            // Pause video at target time to show poster for 3 seconds
+                            if (Math.abs(currentTime - targetTime) < 0.1 && !videoRef.current.paused) {
+                              console.log(`🎬 Pausing video at ${currentTime.toFixed(1)}s for 3-second poster display`);
+                              videoRef.current.pause();
+                              setTimeout(() => {
+                                if (videoRef.current && !videoRef.current.ended) {
+                                  console.log(`🎬 Resuming video after 3-second poster display`);
+                                  videoRef.current.play();
+                                }
+                              }, posterDisplayDuration * 1000);
+                            }
+                          } else {
+                            // Hide poster outside the 3-second window
+                            if (posterOverlay.style.opacity !== '0') {
+                              console.log(`🎬 Hiding poster at ${currentTime.toFixed(1)}s`);
+                              posterOverlay.style.opacity = '0';
                             }
                           }
                         }
-                      }}
-                    />
-                    
-                    {/* Poster overlay that appears at selected frame */}
-                    {isGenerated && uploadedImage && (
-                      <img
-                        id="poster-overlay"
-                        src={import.meta.env.VITE_API_URL + uploadedImage}
-                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0"
-                        alt="Generated poster at selected frame"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <img 
-                    src={uploadedImage} 
-                    className={`w-full h-full object-cover transition-all duration-1000 ease-in-out ${
-                      isGenerating ? 'opacity-40' : 'opacity-100'
-                    }`}
-                    alt="Your artistic poster"
-                    onLoad={() => {
-                      console.log('Generated image fully loaded in background, applying effects');
-                      setGeneratedImageLoaded(true);
-                    }}
-                  />
-                )}
-                
-                {/* Loading overlay with centered spinner - show only during generation */}
-                {isGenerating && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-60 rounded-lg">
-                    <div className="animate-spin h-20 w-20 border-4 border-[#f1b917] border-t-transparent rounded-full shadow-lg mb-4"></div>
-                    <p className="text-white text-lg font-medium mt-2">Creating Your Masterpiece...</p>
-                    <p className="text-white text-sm opacity-80 mt-1">Do not navigate away from the page</p>
-                    <p className="text-white text-sm opacity-80 mt-1">1 - 2 minutes</p>
-                  </div>
-                )}
-                
-                {/* Video upload overlay with centered spinner - show only during video upload */}
-                {isUploadingVideo && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-60 rounded-lg">
-                    <div className="animate-spin h-20 w-20 border-4 border-[#f1b917] border-t-transparent rounded-full shadow-lg mb-4"></div>
-                    <p className="text-white text-lg font-medium mt-2">Uploading Video...</p>
-                    <p className="text-white text-sm opacity-80 mt-1">This may take a moment on mobile connections</p>
-                  </div>
-                )}
-
-                
-                {/* Text overlay display */}
-                {textOverlay && textOverlay.text && (
-                  <div 
-                    className={`absolute pointer-events-none z-30 ${showTextTool ? 'opacity-50' : 'opacity-100'}`}
-                    style={{
-                      left: `${textOverlay.position.x}px`,
-                      top: `${textOverlay.position.y}px`
-                    }}
-                  >
-                    <span 
-                      className="text-white text-2xl font-bold whitespace-nowrap"
-                      style={{ 
-                        textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
-                        display: 'inline-block'
-                      }}
-                    >
-                      {textOverlay.text}
-                    </span>
-                  </div>
-                )}
-                
-                {/* Text overlay tool */}
-                {uploadedImage && showTextTool && onTextAdd && onTextToolClose && (
-                  <TextOverlayTool
-                    containerRef={containerRef}
-                    onSave={(textOverlay) => {
-                      if (onTextAdd) {
-                        onTextAdd(textOverlay);
                       }
                     }}
-                    onCancel={onTextToolClose}
-                    initialText={textOverlay?.text || ''}
-                    initialPosition={textOverlay?.position || { x: 0, y: 0 }}
                   />
-                )}
-              </div>
+
+                  {/* Poster overlay that appears at selected frame */}
+                  {isGenerated && uploadedImage && (
+                    <img
+                      id="poster-overlay"
+                      src={import.meta.env.VITE_API_URL + uploadedImage}
+                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0"
+                      alt="Generated poster at selected frame"
+                    />
+                  )}
+                </div>
+              ) : (
+                <img
+                  src={uploadedImage}
+                  className={`w-full h-full object-cover transition-all duration-1000 ease-in-out ${isGenerating ? 'opacity-40' : 'opacity-100'
+                    }`}
+                  alt="Your artistic poster"
+                  onLoad={() => {
+                    console.log('Generated image fully loaded in background, applying effects');
+                    setGeneratedImageLoaded(true);
+                  }}
+                />
+              )}
+
+              {/* Loading overlay with centered spinner - show only during generation */}
+              {isGenerating && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-60 rounded-lg">
+                  <div className="animate-spin h-20 w-20 border-4 border-[#f1b917] border-t-transparent rounded-full shadow-lg mb-4"></div>
+                  <p className="text-white text-lg font-medium mt-2">Creating Your Masterpiece...</p>
+                  <p className="text-white text-sm opacity-80 mt-1">Do not navigate away from the page</p>
+                  <p className="text-white text-sm opacity-80 mt-1">1 - 2 minutes</p>
+                </div>
+              )}
+
+              {/* Video upload overlay with centered spinner - show only during video upload */}
+              {isUploadingVideo && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-60 rounded-lg">
+                  <div className="animate-spin h-20 w-20 border-4 border-[#f1b917] border-t-transparent rounded-full shadow-lg mb-4"></div>
+                  <p className="text-white text-lg font-medium mt-2">Uploading Video...</p>
+                  <p className="text-white text-sm opacity-80 mt-1">This may take a moment on mobile connections</p>
+                </div>
+              )}
+
+
+              {/* Text overlay display */}
+              {textOverlay && textOverlay.text && (
+                <div
+                  className={`absolute pointer-events-none z-30 ${showTextTool ? 'opacity-50' : 'opacity-100'}`}
+                  style={{
+                    left: `${textOverlay.position.x}px`,
+                    top: `${textOverlay.position.y}px`
+                  }}
+                >
+                  <span
+                    className="text-white text-2xl font-bold whitespace-nowrap"
+                    style={{
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                      display: 'inline-block'
+                    }}
+                  >
+                    {textOverlay.text}
+                  </span>
+                </div>
+              )}
+
+              {/* Text overlay tool */}
+              {uploadedImage && showTextTool && onTextAdd && onTextToolClose && (
+                <TextOverlayTool
+                  containerRef={containerRef}
+                  onSave={(textOverlay) => {
+                    if (onTextAdd) {
+                      onTextAdd(textOverlay);
+                    }
+                  }}
+                  onCancel={onTextToolClose}
+                  initialText={textOverlay?.text || ''}
+                  initialPosition={textOverlay?.position || { x: 0, y: 0 }}
+                />
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+        {/* Hidden inputs */}
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          id="cameraInput"
+          style={{ display: 'none' }}
+          onChange={handleCameraInput}
+        />
+        <input
+          type="file"
+          accept="image/*,video/*"
+          id="libraryInput"
+          style={{ display: 'none' }}
+          onChange={handleLibraryInput}
+        />
       </div>
     </div>
   );

@@ -221,29 +221,25 @@ const ShareModal = ({ isOpen, onClose, imageUrl, shareContext = 'dashboard', pos
             {/* Removed the preview image as requested */}
 
             {/* Share button */}
-            {
-              !isMobile && (
-                <div className="mt-4">
-                  <Button
-                    onClick={handleNativeShare}
-                    disabled={isProcessing}
-                    className="w-full bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 py-3"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Share2 className="mr-2 h-5 w-5" />
-                        Share Now
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )
-            }
+            <div className="mt-4">
+              <Button
+                onClick={handleNativeShare}
+                disabled={isProcessing}
+                className="w-full bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 py-3"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="mr-2 h-5 w-5" />
+                    Share Now
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

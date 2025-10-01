@@ -118,7 +118,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = {
     user,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!localStorage.getItem('auth_token'),
     login,
     logout,
     checkAuth,

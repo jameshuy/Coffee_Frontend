@@ -28,24 +28,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
   const checkAuth = async () => {
     try {
       const response = await apiRequest('GET', '/api/auth/check');
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.authenticated) {
           setUser(data.user);
+          localStorage.setItem("user", JSON.stringify(data.user));
         } else {
           setUser(null);
+          localStorage.removeItem("user");
         }
       } else {
         setUser(null);
+        localStorage.removeItem("user");
       }
     } catch (error) {
       // Silently handle auth check failures to prevent error overlay
       // This is expected behavior when user is not authenticated
       setUser(null);
+      localStorage.removeItem("user");
     } finally {
       setIsLoading(false);
     }
@@ -61,6 +72,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("auth_token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
         setUser(data.user);
         return true;
       } else {
@@ -78,6 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(null);
       // Clear local storage
       localStorage.removeItem("auth_token");
+      localStorage.removeItem("user");
       localStorage.removeItem('posterTheMoment_verifiedEmail');
       // Force page refresh with cache busting to clear any cached state
       window.location.href = '/?t=' + Date.now();
@@ -92,7 +105,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     checkAuth();
-    
+
     // Add page visibility listener to check auth when user returns via back button
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -100,15 +113,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         checkAuth();
       }
     };
-    
+
     const handlePageShow = () => {
       // Re-check authentication when page is shown (back button navigation)
       checkAuth();
     };
-    
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pageshow', handlePageShow);
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pageshow', handlePageShow);

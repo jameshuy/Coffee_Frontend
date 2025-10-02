@@ -244,14 +244,14 @@ export function SignUpModal({ open, onOpenChange }: SignUpModalProps) {
                   }}
                   placeholder="Enter username (5-20 characters)"
                   className={`bg-gray-900 border-gray-700 text-white pr-8 ${username.length >= 5 && username.length <= 20
-                      ? usernameAvailable === true
-                        ? 'border-green-500'
-                        : usernameAvailable === false
-                          ? 'border-red-500'
-                          : 'border-yellow-500'
-                      : username.length > 0
+                    ? usernameAvailable === true
+                      ? 'border-green-500'
+                      : usernameAvailable === false
                         ? 'border-red-500'
-                        : ''
+                        : 'border-yellow-500'
+                    : username.length > 0
+                      ? 'border-red-500'
+                      : ''
                     }`}
                 />
                 {username.length >= 5 && username.length <= 20 && (

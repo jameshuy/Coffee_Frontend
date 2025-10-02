@@ -16,7 +16,7 @@ export async function apiRequest(
   const token = localStorage.getItem("auth_token");
   const res = await fetch(import.meta.env.VITE_API_URL + url, {
     method,
-    headers: data ? { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), } : {},
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });

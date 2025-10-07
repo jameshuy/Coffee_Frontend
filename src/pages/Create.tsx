@@ -264,6 +264,7 @@ export default function Create() {
     const generatedPosterUrl = formData.uploadedImage;
     if (generatedPosterUrl && userEmail) {
       // Always open the sell poster modal - it will handle subscription checking internally
+      setGeneratedPosterUrl(generatedPosterUrl);
       setIsSellPosterModalOpen(true);
     } else {
       // Show message if there's no image or user email

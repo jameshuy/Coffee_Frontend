@@ -15,8 +15,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Tag, AlertTriangle, XCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/context/AuthContext";
-import SubscriptionModal from "@/components/SubscriptionModal";
 
 // Terms and Conditions Dialog component
 function TermsDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -99,57 +97,25 @@ export default function SellPosterModal({
   userEmail,
   posterPath,
 }: SellPosterModalProps) {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  const [userStats, setUserStats] = useState<{ postersForSale: number; isSubscribed: boolean } | null>(null);
 
   // Poster details state
   const [posterName, setPosterName] = useState<string>('');
   const [momentLink, setMomentLink] = useState<string>('');
   const [city, setCity] = useState<string>('');
 
-  // Limited edition state (all posters are now limited edition)
-  const [totalSupply, setTotalSupply] = useState<string>('50');
-  const [pricePerUnit, setPricePerUnit] = useState<string>('45.00');
-
   // Check user's poster selling eligibility when modal opens
   useEffect(() => {
-    const checkUserEligibility = async () => {
-      if (!isOpen || !userEmail) {
-        console.log('SellPosterModal - Modal not open or no user email:', { isOpen, userEmail });
-        return;
-      }
+    if (!isOpen || !userEmail) {
+      console.log('SellPosterModal - Modal not open or no user email:', { isOpen, userEmail });
+      return;
+    }
 
-      console.log('SellPosterModal - Checking eligibility for:', userEmail);
-      console.log('SellPosterModal - Auth user object:', user);
-
-      try {
-        const response = await apiRequest('GET', `/api/user-poster-stats?email=${encodeURIComponent(userEmail)}`);
-        if (response.ok) {
-          const stats = await response.json();
-          console.log('SellPosterModal - User stats loaded:', stats);
-          setUserStats(stats);
-
-          // If user has already used both their free poster sales and is not subscribed, show subscription modal immediately
-          if (!stats.isSubscribed && stats.postersForSale >= 2) {
-            console.log('SellPosterModal - User has exceeded free limit, showing subscription modal');
-            setShowSubscriptionModal(true);
-          } else {
-            console.log('SellPosterModal - User can sell poster, showing sell form');
-          }
-        } else {
-          console.error('SellPosterModal - Failed to get user stats:', response.status);
-        }
-      } catch (error) {
-        console.error('SellPosterModal - Error checking user eligibility:', error);
-      }
-    };
-
-    checkUserEligibility();
+    console.log('SellPosterModal - User can sell poster without restrictions:', userEmail);
+    // All users can now publish unlimited posters
   }, [isOpen, userEmail]);
 
   const handleSellPoster = async () => {
@@ -159,13 +125,6 @@ export default function SellPosterModal({
         description: "Missing poster information. Please try again.",
         variant: "destructive",
       });
-      return;
-    }
-
-    // Check if user can sell poster before proceeding
-    if (userStats && !userStats.isSubscribed && userStats.postersForSale >= 2) {
-      // User has already used both their free poster sales - show subscription modal
-      setShowSubscriptionModal(true);
       return;
     }
 
@@ -198,26 +157,8 @@ export default function SellPosterModal({
     }
 
     // Validate limited edition inputs (all posters are now limited edition)
-    const supplyNum = parseInt(totalSupply);
-    const priceNum = parseFloat(pricePerUnit);
-
-    if (isNaN(supplyNum) || supplyNum < 1 || supplyNum > 1000) {
-      toast({
-        title: "Invalid Supply",
-        description: "Limited editions must have between 1 and 1000 prints.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (isNaN(priceNum) || priceNum < 29.95) {
-      toast({
-        title: "Invalid Price",
-        description: "Limited editions must be priced at least 29.95 CHF.",
-        variant: "destructive",
-      });
-      return;
-    }
+    const supplyNum = 200;
+    const priceNum = 30;
 
     setIsSubmitting(true);
 
@@ -268,8 +209,8 @@ export default function SellPosterModal({
           name: posterName.trim() || null,
           momentLink: momentLink.trim() || null,
           city: city.trim(),
-          totalSupply: parseInt(totalSupply),
-          pricePerUnit: parseFloat(pricePerUnit)
+          totalSupply: supplyNum,
+          pricePerUnit: priceNum
         };
 
         const response = await apiRequest('PATCH', `/api/images/${matchingImage.id}/public`, requestData);
@@ -281,21 +222,13 @@ export default function SellPosterModal({
           // Small delay to ensure database transaction completes
           await new Promise(resolve => setTimeout(resolve, 100));
 
-          // Refresh user stats after successful publication
-          const refreshResponse = await apiRequest('GET', `/api/user-poster-stats?email=${encodeURIComponent(userEmail)}&t=${Date.now()}`);
-          if (refreshResponse.ok) {
-            const updatedStats = await refreshResponse.json();
-            console.log('Updated user stats after publication:', updatedStats);
-            setUserStats(updatedStats);
-          }
-
-          const successMessage = `Your limited edition poster (${totalSupply} prints at ${pricePerUnit} CHF each) is now available in the catalogue!`;
+          const successMessage = `Your limited edition poster (200 prints at €30 each) is now available in the catalogue!`;
 
           toast({
             title: "Success!",
             description: successMessage,
             variant: "default",
-            duration: 4000,
+            duration: 5000,
           });
           onSuccess?.();
 
@@ -411,48 +344,16 @@ export default function SellPosterModal({
             </div>
           </div>
 
-          {/* Limited Edition Controls */}
+          {/* Limited Edition Info */}
           <div className="space-y-4 border-t border-gray-800 pt-4">
-            <div className="space-y-3">
-              <Label className="text-white text-sm font-medium">Limited Edition Details</Label>
-              <p className="text-xs text-gray-400">Every poster is a limited edition collectible</p>
-            </div>
-
-            {/* Limited Edition Options */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="totalSupply" className="text-white text-sm">Total Supply</Label>
-                  <Input
-                    id="totalSupply"
-                    type="text"
-                    value={totalSupply}
-                    onChange={(e) => setTotalSupply(e.target.value)}
-                    className="bg-gray-900 border-gray-700 text-white"
-                    placeholder="50"
-                  />
-                  <p className="text-xs text-gray-400">1-1000 prints</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="pricePerUnit" className="text-white text-sm">Price (CHF)</Label>
-                  <Input
-                    id="pricePerUnit"
-                    type="text"
-                    value={pricePerUnit}
-                    onChange={(e) => setPricePerUnit(e.target.value)}
-                    className="bg-gray-900 border-gray-700 text-white"
-                    placeholder="45.00"
-                  />
-                  <p className="text-xs text-gray-400">Min. 29.95 CHF</p>
-                </div>
-              </div>
-
-              <div className="bg-amber-900/20 border border-amber-800/50 rounded-md p-3">
-                <div className="flex items-start space-x-2">
+            <div className="bg-gray-900 border border-gray-700 rounded-md p-4">
+              <div className="space-y-2">
+                <Label className="text-white text-sm font-medium">Standard Edition Details</Label>
+                <p className="text-gray-300 text-sm">All designs are limited to 200 prints and priced at €30</p>
+                <div className="flex items-start space-x-2 mt-3">
                   <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
                   <div className="text-xs text-amber-200">
-                    <p className="font-medium mb-1">Limited Edition Terms:</p>
-                    <p>Supply limit cannot be changed after publishing. Each buyer will receive a numbered edition.</p>
+                    <p>Each buyer will receive a numbered edition (e.g., #1/200, #2/200, etc.)</p>
                   </div>
                 </div>
               </div>
@@ -497,35 +398,6 @@ export default function SellPosterModal({
 
       {/* Terms and Conditions Dialog */}
       <TermsDialog isOpen={showTerms} onClose={() => setShowTerms(false)} />
-
-      {/* Subscription Modal */}
-      <SubscriptionModal
-        isOpen={showSubscriptionModal}
-        onClose={() => {
-          setShowSubscriptionModal(false);
-          // Close the sell poster modal too since user can't sell without subscription
-          onClose();
-        }}
-        email={userEmail || ""}
-        onSubscriptionComplete={() => {
-          setShowSubscriptionModal(false);
-          // Refresh user stats after subscription
-          if (userEmail) {
-            const refreshStats = async () => {
-              try {
-                const response = await apiRequest('GET', `/api/user-poster-stats?email=${encodeURIComponent(userEmail)}`);
-                if (response.ok) {
-                  const stats = await response.json();
-                  setUserStats(stats);
-                }
-              } catch (error) {
-                console.error('Error refreshing user stats:', error);
-              }
-            };
-            refreshStats();
-          }
-        }}
-      />
     </>
   );
 }

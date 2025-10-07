@@ -90,13 +90,13 @@ export default function LandingPageContent() {
       {/* Landing page text */}
       <div className="mb-6 flex flex-col items-center justify-center w-full">
       <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap mb-1">
-          Turn photos into collectible prints
+          Turn photos into collectible prints.
         </p>
         <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap mb-1">
-          and monetize your moments.
+          Create for you, a friend or your community.
         </p>
         <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap">
-          Get featured in cafés.
+          Get featured in cafés and earn royalities.
         </p>
       </div>
       <div className="mb-6 flex justify-center w-full overflow-hidden">

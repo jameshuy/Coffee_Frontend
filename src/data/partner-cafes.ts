@@ -41,5 +41,11 @@ export const PARTNER_CAFES:PartnerCafeItem[] = [
     name: 'Alfred Caffeebar',
     logo: '/partners/alfred-caffebar.jpg',
     link: 'https://www.instagram.com/alfred_caffebar/'
+  },
+  {
+    id: 'ondo',
+    name: 'Ondo',
+    logo: '/partners/ondo.jpg',
+    link: 'https://www.instagram.com/ondosocial'
   }
 ];

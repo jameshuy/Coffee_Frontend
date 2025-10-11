@@ -594,7 +594,7 @@ export default function ImageUploader({
                   {isGenerated && uploadedImage && (
                     <img
                       id="poster-overlay"
-                      src={import.meta.env.VITE_API_URL + uploadedImage}
+                      src={uploadedImage}
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0"
                       alt="Generated poster at selected frame"
                     />

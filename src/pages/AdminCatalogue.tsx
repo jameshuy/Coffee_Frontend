@@ -4,14 +4,14 @@ import CatalogueGrid from "@/components/CatalogueGrid";
 import ShareModal from "@/components/ShareModal";
 import { useState, useEffect } from "react";
 import { Search, ArrowLeft } from "lucide-react";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/Button";
+import { useLocation } from "wouter";
 
 export default function AdminCatalogue() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareImageUrl, setShareImageUrl] = useState("");
   const [sharePosterId, setSharePosterId] = useState("");
+  const [_, setLocation] = useLocation();
 
   const [targetPosterId, setTargetPosterId] = useState<string | null>(null);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -67,59 +67,58 @@ export default function AdminCatalogue() {
       <Navigation />
       
       <main className="flex-grow container mx-auto px-4 pt-1 pb-6 relative">
-        <div className="flex flex-col items-center justify-center mb-6">
-          <div className="w-full flex items-center justify-between mt-4">
-            {/* Back to Admin Orders button */}
-            <Link href="/admin/orders">
-              <Button variant="outline" size="sm" className="text-white border-[#f1b917] hover:bg-[#f1b917] hover:text-black">
-                <ArrowLeft className="mr-2" size={16} />
-                Back to Admin
-              </Button>
-            </Link>
-            
-            {/* Title in center */}
-            <h1 className="text-2xl font-bold text-[#f1b917] absolute left-1/2 transform -translate-x-1/2">
-              Admin Catalogue (Full Resolution)
+        {/* Header with back button, title, and search - matching AdminReview layout */}
+        <div className="flex items-center justify-between mb-2">
+          <button
+            onClick={() => setLocation('/admin/orders')}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
+          </button>
+          
+          {/* Centered Title */}
+          <div className="flex-1 flex justify-center">
+            <h1 className="text-2xl font-bold text-[#f1b917] text-center">
+              <span className="hidden sm:inline">Admin Catalogue (Full Resolution)</span>
+              <span className="sm:hidden">Admin Catalogue</span>
             </h1>
-            
-            {/* Search Icon */}
-            <div className="flex items-center gap-2">
-              <div className="search-container">
-                <button 
-                  className="p-2 text-white hover:text-[#f1b917] transition-colors"
-                  onClick={() => {
-                    if (isSearchExpanded) {
-                      setSearchQuery(""); // Clear search when hiding
-                    }
-                    setIsSearchExpanded(!isSearchExpanded);
-                  }}
-                  aria-label="Toggle search"
-                >
-                  <Search size={24} />
-                </button>
-              </div>
-            </div>
           </div>
           
-          {/* Horizontal line */}
-          <div className="w-full h-px bg-white mt-3"></div>
-          
-          {/* Animated Search Bar - appears below the icons */}
-          <div className={`w-full transition-all duration-300 ease-in-out overflow-hidden ${
-            isSearchExpanded ? 'max-h-20 opacity-100 mt-4' : 'max-h-0 opacity-0'
-          }`}>
-            <div className="flex justify-center">
-              <div className="search-input-area relative w-full max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="text"
-                  placeholder="Search creators or poster names"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-400 placeholder:text-xs focus:outline-none focus:border-[#f1b917]"
-                  autoFocus={isSearchExpanded}
-                />
-              </div>
+          {/* Search Icon */}
+          <div className="search-container flex items-center">
+            <button 
+              className="text-gray-400 hover:text-white transition-colors flex items-center justify-center"
+              onClick={() => {
+                if (isSearchExpanded) {
+                  setSearchQuery(""); // Clear search when hiding
+                }
+                setIsSearchExpanded(!isSearchExpanded);
+              }}
+              aria-label="Toggle search"
+            >
+              <Search size={20} className="sm:w-6 sm:h-6" />
+            </button>
+          </div>
+        </div>
+        
+        {/* Horizontal line */}
+        <div className="w-full h-px bg-white mb-6"></div>
+        
+        {/* Animated Search Bar - appears below the header */}
+        <div className={`w-full transition-all duration-300 ease-in-out overflow-hidden ${
+          isSearchExpanded ? 'max-h-20 opacity-100 mb-6' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="flex justify-center px-4">
+            <div className="search-input-area relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <input
+                type="text"
+                placeholder="Search creators or poster names"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-400 placeholder:text-xs focus:outline-none focus:border-[#f1b917]"
+                autoFocus={isSearchExpanded}
+              />
             </div>
           </div>
         </div>

@@ -14,7 +14,9 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  adminLogin: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  adminLogout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
 
@@ -84,6 +86,49 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const adminLogin = async (username: string, password: string): Promise<boolean> => {
+    try {
+      const response = await apiRequest('POST', '/api/admin/login', {
+        username,
+        password,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("admin_auth_token", data.sessionToken);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
+    }
+  };
+
+  const adminLogout = async () => {
+    try {
+      const response = await apiRequest('POST', '/api/admin/logout');
+      if (!response.ok) {
+        if (response.status === 401) {
+          // setLocation("/admin/login");
+          throw new Error("Unauthorized");
+        }
+        throw new Error("Failed to fetch orders");
+      }
+
+      // Clear local storage
+      localStorage.removeItem("admin_auth_token");
+      localStorage.removeItem('posterTheMoment_verifiedEmail');
+      // Force page refresh with cache busting to clear any cached state
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Still clear user state even if logout request fails
+      localStorage.removeItem('posterTheMoment_verifiedEmail');
+      window.location.href = '/?t=' + Date.now();
+    }
+  };
+
   const logout = async () => {
     try {
       await apiRequest('POST', '/api/auth/logout');
@@ -133,7 +178,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     isAuthenticated: !!localStorage.getItem('auth_token'),
     login,
+    adminLogin,
     logout,
+    adminLogout,
     checkAuth,
   };
 

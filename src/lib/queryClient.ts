@@ -14,9 +14,14 @@ export async function apiRequest(
 ): Promise<Response> {
   console.log(method, data)
   const token = localStorage.getItem("auth_token");
+  const adminToken = localStorage.getItem("admin_auth_token");
   const res = await fetch(import.meta.env.VITE_API_URL + url, {
     method,
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), },
+    headers: { 
+      "Content-Type": "application/json", 
+      ...(token ? { Authorization: `Bearer ${token}` } : {}), 
+      ...(adminToken ? { "Admin-Session": `Bearer ${adminToken}` } : {}),
+    },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
@@ -14,13 +15,14 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
+  const { adminLogin } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await apiRequest("POST", "/api/admin/login", { username, password });
+      adminLogin(username, password);
 
       // Redirect to admin dashboard directly without showing success toast
       setLocation("/admin/orders");
@@ -68,8 +70,8 @@ export default function AdminLogin() {
                 className="bg-gray-900 border-gray-700 text-white"
               />
             </div>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-gold-500 hover:bg-gold-600 text-black"
               disabled={isLoading}
             >

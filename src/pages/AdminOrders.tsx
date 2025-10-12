@@ -38,6 +38,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Eye, LogOut, RefreshCw, Download, Database } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminOrders() {
   // State variables
@@ -49,6 +50,7 @@ export default function AdminOrders() {
   const [isDownloadingStorage, setIsDownloadingStorage] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
+  const { adminLogout } = useAuth();
 
   // Fetch standard orders query
   const {
@@ -157,11 +159,7 @@ export default function AdminOrders() {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/admin/logout");
-
-      if (!response.ok) {
-        throw new Error("Failed to logout");
-      }
+      adminLogout();
     },
     onSuccess: () => {
       toast({
@@ -410,7 +408,7 @@ export default function AdminOrders() {
               <Download className="mr-2 h-4 w-4" /> Export CSV
             </Button>
             <Button
-              onClick={() => {}}
+              onClick={() => { }}
               disabled={isDownloadingStorage}
               className="bg-[#f1b917] hover:bg-opacity-90 text-white"
             >

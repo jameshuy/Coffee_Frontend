@@ -13,6 +13,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   adminLogin: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -177,6 +178,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     isLoading,
     isAuthenticated: !!localStorage.getItem('auth_token'),
+    isAdmin: !!localStorage.getItem('admin_auth_token'),
     login,
     adminLogin,
     logout,

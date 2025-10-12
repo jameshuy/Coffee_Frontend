@@ -50,7 +50,7 @@ export default function AdminOrders() {
   const [isDownloadingStorage, setIsDownloadingStorage] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
-  const { adminLogout } = useAuth();
+  const { adminLogout, isAdmin } = useAuth();
 
   // Fetch standard orders query
   const {
@@ -319,21 +319,9 @@ export default function AdminOrders() {
 
   // Check if the user is authenticated
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await apiRequest("GET", "/api/admin/orders");
-
-        if (response.status === 401) {
-          setLocation("/admin/login");
-        }
-      } catch (error) {
-        console.error("Auth check failed:", error);
-        setLocation("/admin/login");
-      }
-    };
-
-    checkAuth();
-  }, [setLocation]);
+    if (!isAdmin)
+      setLocation("/admin/login");
+  }, []);
 
   // Loading state
   if (isStandardLoading && !viewCatalogueOrders) {

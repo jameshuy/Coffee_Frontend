@@ -50,7 +50,7 @@ export default function AdminOrders() {
   const [isDownloadingStorage, setIsDownloadingStorage] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
-  const { adminLogout, isAdmin } = useAuth();
+  const { adminLogout, isAdmin, isLoading: authLoading } = useAuth();
 
   // Fetch standard orders query
   const {
@@ -319,9 +319,11 @@ export default function AdminOrders() {
 
   // Check if the user is authenticated
   useEffect(() => {
-    if (!isAdmin)
+    // Wait for authentication check to complete before redirecting
+    if (!authLoading && !isAdmin) {
       setLocation("/admin/login");
-  }, []);
+    }
+  }, [authLoading, isAdmin, setLocation]);
 
   // Loading state
   if (isStandardLoading && !viewCatalogueOrders) {

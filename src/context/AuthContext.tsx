@@ -19,6 +19,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   adminLogout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  checkAdminAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,12 +31,17 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
+    
+    // Check if admin token exists in localStorage
+    const adminToken = localStorage.getItem("admin_auth_token");
+    setIsAdmin(!!adminToken);
   }, []);
 
   const checkAuth = async () => {
@@ -62,6 +68,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.removeItem("user");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const checkAdminAuth = async () => {
+    const adminToken = localStorage.getItem("admin_auth_token");
+    if (!adminToken) {
+      setIsAdmin(false);
+      return;
+    }
+
+    try {
+      // Try to make a simple admin request to verify the token is still valid
+      const response = await apiRequest('GET', '/api/admin/orders?page=1&limit=1');
+      if (response.ok) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+        localStorage.removeItem("admin_auth_token");
+      }
+    } catch (error) {
+      // If the request fails, the admin token is invalid
+      setIsAdmin(false);
+      localStorage.removeItem("admin_auth_token");
     }
   };
 
@@ -97,6 +126,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("admin_auth_token", data.sessionToken);
+        setIsAdmin(true);
         return true;
       } else {
         return false;
@@ -118,14 +148,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error("Failed to fetch orders");
       }
 
-      // Clear local storage
+      // Clear local storage and admin state
       localStorage.removeItem("admin_auth_token");
       localStorage.removeItem('posterTheMoment_verifiedEmail');
+      setIsAdmin(false);
       // Force page refresh with cache busting to clear any cached state
     } catch (error) {
       console.error('Logout failed:', error);
       // Still clear user state even if logout request fails
+      localStorage.removeItem("admin_auth_token");
       localStorage.removeItem('posterTheMoment_verifiedEmail');
+      setIsAdmin(false);
       window.location.href = '/?t=' + Date.now();
     }
   };
@@ -150,19 +183,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
-    checkAuth();
+    const initializeAuth = async () => {
+      await Promise.all([
+        checkAuth(),
+        checkAdminAuth()
+      ]);
+    };
+
+    initializeAuth();
 
     // Add page visibility listener to check auth when user returns via back button
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         // Re-check authentication when page becomes visible
         checkAuth();
+        checkAdminAuth();
       }
     };
 
     const handlePageShow = () => {
       // Re-check authentication when page is shown (back button navigation)
       checkAuth();
+      checkAdminAuth();
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -178,12 +220,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     isLoading,
     isAuthenticated: !!localStorage.getItem('auth_token'),
-    isAdmin: !!localStorage.getItem('admin_auth_token'),
+    isAdmin,
     login,
     adminLogin,
     logout,
     adminLogout,
     checkAuth,
+    checkAdminAuth,
   };
 
   return (

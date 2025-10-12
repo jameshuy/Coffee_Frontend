@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
@@ -15,17 +15,30 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
-  const { adminLogin } = useAuth();
+  const { adminLogin, isAdmin, isLoading: authLoading } = useAuth();
+
+  // Redirect if already authenticated as admin
+  useEffect(() => {
+    if (!authLoading && isAdmin) {
+      setLocation("/admin/orders");
+    }
+  }, [authLoading, isAdmin, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      adminLogin(username, password);
-
-      // Redirect to admin dashboard directly without showing success toast
-      setLocation("/admin/orders");
+      const success = await adminLogin(username, password);
+      if (success) {
+        setLocation("/admin/orders");
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Invalid username or password",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Login failed",

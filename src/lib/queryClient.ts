@@ -19,7 +19,7 @@ export async function apiRequest(
     headers: { 
       "Content-Type": "application/json", 
       ...(token ? { Authorization: `Bearer ${token}` } : {}), 
-      ...(adminToken ? { "Admin-Session": `Bearer ${adminToken}` } : {}),
+      ...(adminToken ? { "Admin-Session": `${adminToken}` } : {}),
     },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",

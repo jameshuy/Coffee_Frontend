@@ -19,8 +19,8 @@ export default function PolicyModal({ title, children, triggerText }: PolicyModa
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <a 
-          href="#" 
+        <a
+          href="#"
           onClick={(e) => { e.preventDefault(); setIsOpen(true); }}
           className="text-white hover:text-opacity-80 transition-all cursor-pointer text-xs"
         >

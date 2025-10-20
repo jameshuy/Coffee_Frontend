@@ -20,6 +20,8 @@ import Settings from "@/pages/Settings";
 import Partners from "@/pages/Partners";
 import AdminReview from "./pages/AdminReview";
 import ExternalRedirect from "@/components/ExternalRedirect";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 function Router() {
   return (
@@ -32,6 +34,8 @@ function Router() {
       {/* <Route path="/settings" component={Settings} /> */}
       <Route path="/earn" component={Earn} />
       <Route path="/partners" component={Partners} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
       <Route path="/restock">
         <ExternalRedirect to={`${import.meta.env.VITE_API_URL}/restock`} />
       </Route>

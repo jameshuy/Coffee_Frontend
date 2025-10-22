@@ -53,10 +53,26 @@ export default function ImageUploader({
   const [generatedImageLoaded, setGeneratedImageLoaded] = useState(false);
   const [showVideoTransition, setShowVideoTransition] = useState(false);
   const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
+  const [hasOpenedCamera, setHasOpenedCamera] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const posterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    // Only auto-open camera on mobile and when no uploaded image exists
+    if (isMobile && !uploadedImage && !hasOpenedCamera) {
+      const openCamera = setTimeout(() => {
+        const cameraInput = document.getElementById('cameraInput') as HTMLInputElement | null;
+        if (cameraInput) {
+          cameraInput.click();
+          setHasOpenedCamera(true);
+        }
+      }, 800); // small delay for page transition to settle
+
+      return () => clearTimeout(openCamera);
+    }
+  }, [isMobile, uploadedImage, hasOpenedCamera]);
 
   // Calculate and update container height based on viewport
   useEffect(() => {

@@ -1011,7 +1011,7 @@ export default function Create() {
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
-        imageUrl={generatedPosterUrl}
+        imageUrl={formData.uploadedImage}
       />
 
       {/* Sell Poster Modal */}

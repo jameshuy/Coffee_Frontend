@@ -7,6 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { trackImageUpload, trackEvent } from '@/lib/analytics';
 import { preventImageDownload } from '@/lib/image-protection';
 import TextOverlayTool from './TextOverlayTool';
+import { useDeviceInfo } from '@/hooks/check-device';
 
 interface TextOverlay {
   text: string;
@@ -53,26 +54,25 @@ export default function ImageUploader({
   const [generatedImageLoaded, setGeneratedImageLoaded] = useState(false);
   const [showVideoTransition, setShowVideoTransition] = useState(false);
   const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
-  const [hasOpenedCamera, setHasOpenedCamera] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const posterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
+  const deviceInfo = useDeviceInfo();
 
   useEffect(() => {
     // Only auto-open camera on mobile and when no uploaded image exists
-    if (isMobile && !uploadedImage && !hasOpenedCamera) {
+    if (deviceInfo.isMobile && !isGenerated) {
       const openCamera = setTimeout(() => {
         const cameraInput = document.getElementById('cameraInput') as HTMLInputElement | null;
         if (cameraInput) {
           cameraInput.click();
-          setHasOpenedCamera(true);
         }
       }, 800); // small delay for page transition to settle
 
       return () => clearTimeout(openCamera);
     }
-  }, [isMobile, uploadedImage, hasOpenedCamera]);
+  }, [deviceInfo, isGenerated]);
 
   // Calculate and update container height based on viewport
   useEffect(() => {
@@ -527,7 +527,7 @@ export default function ImageUploader({
             <input {...getInputProps()} capture="environment" />
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center gap-2">
               {
-                isMobile && (
+                deviceInfo.isMobile && (
                   <Button onClick={(e) => { e.stopPropagation(); document.getElementById('cameraInput')?.click() }} className='w-full inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-5 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-base'>
                     Take Photo
                   </Button>

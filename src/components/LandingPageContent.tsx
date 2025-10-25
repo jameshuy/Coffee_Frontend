@@ -89,14 +89,14 @@ export default function LandingPageContent() {
 
       {/* Landing page text */}
       <div className="mb-6 flex flex-col items-center justify-center w-full">
-      <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap mb-1">
-          Turn photos into collectible prints.
+        <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap mb-1">
+          Turn moments into collectible prints.
         </p>
         <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap mb-1">
-          Create for you, a friend or your community.
+          Create for you, a friend or a collection.
         </p>
         <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap">
-          Get featured in cafés and earn royalities.
+          Get featured in cafés and earn royalties.
         </p>
       </div>
       <div className="mb-6 flex justify-center w-full overflow-hidden">
@@ -114,11 +114,11 @@ export default function LandingPageContent() {
                   trackEvent('Navigation', 'partner_clicked', partner.name);
                 }}
               >
-                <div 
+                <div
                   className={`bg-white rounded-md overflow-hidden flex items-center justify-center ${partner.id === 'caffeyolo' ? 'border-2 border-white' : ''}`}
-                  style={{ 
-                    height: 'clamp(60px, 15vw, 120px)', 
-                    width: 'clamp(60px, 15vw, 120px)' 
+                  style={{
+                    height: 'clamp(60px, 15vw, 120px)',
+                    width: 'clamp(60px, 15vw, 120px)'
                   }}
                 >
                   <img
@@ -141,11 +141,11 @@ export default function LandingPageContent() {
                   trackEvent('Navigation', 'partner_clicked', partner.name);
                 }}
               >
-                <div 
+                <div
                   className={`bg-white rounded-md overflow-hidden flex items-center justify-center ${partner.id === 'caffeyolo' ? 'border-2 border-white' : ''}`}
-                  style={{ 
-                    height: 'clamp(60px, 15vw, 120px)', 
-                    width: 'clamp(60px, 15vw, 120px)' 
+                  style={{
+                    height: 'clamp(60px, 15vw, 120px)',
+                    width: 'clamp(60px, 15vw, 120px)'
                   }}
                 >
                   <img

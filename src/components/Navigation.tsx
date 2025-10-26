@@ -210,7 +210,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                 {hasUserSession && (
                   !isMobile ? (
                     <div className="flex items-center gap-3 sm:gap-2 flex-shrink-0 w-full sm:w-auto justify-center sm:justify-end">
-                      <NavIcon href="/winners" active={isFeedPage}>
+                      <NavIcon href="/feed" active={isFeedPage}>
                         <Home size={24} />
                       </NavIcon>
 

@@ -83,10 +83,10 @@ export default function Catalogue() {
 
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col pb-16">
       <Navigation />
 
-      <main className="flex-grow container mx-auto px-4 pt-1 pb-6 relative">
+      <main className="flex-grow container mx-auto px-4 pt-28 pb-6 relative">
         {!isMobile ? <div className="flex flex-col items-center justify-center mb-6">
           <div className="w-full flex items-center justify-between mt-4">
             {/* Create Print button - shows for all users */}

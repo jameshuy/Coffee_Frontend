@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 import NavIcon from '@/components/ui/nav-icon';
 import CreditsBadge from '@/components/ui/credits-badge';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NavigationProps {
   transparent?: boolean;
@@ -13,7 +14,9 @@ interface NavigationProps {
 export default function Navigation({ transparent = false }: NavigationProps) {
   const [location] = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
+  const isMobile = useIsMobile();
   const {
+    isLandingPage,
     isCataloguePage,
     isDashboardPage,
     isSettingsPage,
@@ -22,6 +25,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
     isFeedPage,
     isPartnersPage,
   } = useMemo(() => ({
+    isLandingPage: location === "/",
     isCataloguePage: location === "/catalogue",
     isDashboardPage: location === "/dashboard",
     isSettingsPage: location === "/settings",
@@ -88,7 +92,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
   return (
     <nav className={`${transparent ? 'bg-transparent' : 'bg-black'} shadow-sm pt-3 pb-2`}>
       <div className="container mx-auto px-4">
-        <div className="w-full relative">
+        <div className={`w-full relative ${isMobile && !isLandingPage ? 'border-b' : ''}`}>
           {isCreatePage || isFeedPage ? (
             // Create and Feed pages: same layout as catalogue page
             <div className="flex flex-col justify-center items-center text-center">
@@ -98,15 +102,15 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                     <span className="text-white">Coffee&</span><span className="text-[#f1b917]">Prints</span>
                   </h1>
                 </Link>
-                {isFeedPage && (
+                {!isMobile && isFeedPage && (
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Moments</span>
                 )}
-                {isCreatePage && (
+                {!isMobile && isCreatePage && (
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Create</span>
                 )}
               </div>
               
-              {hasUserSession && (
+              {!isMobile && hasUserSession && (
                 <div className="w-full flex flex-col mt-4">
                   <div className="w-full flex items-center justify-between">
                     {/* Credits indicator on far left */}
@@ -158,7 +162,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                 </div>
               )}
               
-              {!hasUserSession && isFeedPage && (
+              {!isMobile && !hasUserSession && isFeedPage && (
                 <div className="w-full flex flex-col mt-4">
                   <div className="w-full flex items-center justify-center">
                     {/* Navigation icons for unauthenticated users on feed page */}

@@ -34,20 +34,20 @@ export default function Navigation({ transparent = false }: NavigationProps) {
     isFeedPage: location === "/feed",
     isPartnersPage: location === "/partners",
   }), [location]);
-  
+
   // Use proper authentication state only
   const hasUserSession = isAuthenticated;
-  
+
   // Credits state for Create page
   const [availableCredits, setAvailableCredits] = useState<number>(0);
   const [isArtisticCollective, setIsArtisticCollective] = useState<boolean>(false);
-  
+
   // Fetch credits and user type when on Create/Feed and user has session
   const fetchCredits = useCallback(async () => {
     try {
       // Get user email from auth context only
       const userEmail = user?.email;
-      
+
       if (userEmail) {
         const response = await apiRequest('GET', `/api/generation-credits?email=${encodeURIComponent(userEmail)}`);
         if (response.ok) {
@@ -88,7 +88,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
     window.addEventListener('creditsUpdated', handleCreditUpdate);
     return () => window.removeEventListener('creditsUpdated', handleCreditUpdate);
   }, [triggerFetchIfNeeded]);
-  
+
   return (
     <nav className={`${transparent ? 'bg-transparent' : 'bg-black'} shadow-sm pt-3 pb-2`}>
       <div className="container mx-auto px-4">
@@ -109,12 +109,12 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Create</span>
                 )}
               </div>
-              
+
               {!isMobile && hasUserSession && (
                 <div className="w-full flex flex-col mt-4">
                   <div className="w-full flex items-center justify-between">
                     {/* Credits indicator on far left */}
-                    <CreditsBadge 
+                    <CreditsBadge
                       isArtisticCollective={isArtisticCollective}
                       availableCredits={availableCredits}
                       onClick={() => {
@@ -125,29 +125,29 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                         }
                       }}
                     />
-                    
+
                     {/* Navigation icons */}
                     <div className="flex items-center gap-2">
                       <NavIcon href="/feed" active={isFeedPage}>
                         <Play size={24} />
                       </NavIcon>
-                      
+
                       <NavIcon href="/create" active={isCreatePage}>
                         <Brush size={24} />
                       </NavIcon>
-                      
+
                       <NavIcon href="/catalogue" active={isCataloguePage}>
                         <Store size={24} />
                       </NavIcon>
-                      
+
                       <NavIcon href="/dashboard" active={isDashboardPage}>
                         <User size={24} />
                       </NavIcon>
-                      
+
                       {/* <NavIcon href="/settings" active={isSettingsPage}>
                         <Settings size={24} />
                       </NavIcon> */}
-                      
+
                       <button
                         onClick={logout}
                         className="p-2 text-white hover:text-red-400 transition-colors cursor-pointer"
@@ -156,33 +156,31 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Horizontal line spanning from credits to logout */}
                   <div className="w-full h-px bg-white mt-3"></div>
                 </div>
               )}
-              
+
               {!isMobile && !hasUserSession && isFeedPage && (
                 <div className="w-full flex flex-col mt-4">
                   <div className="w-full flex items-center justify-center">
                     {/* Navigation icons for unauthenticated users on feed page */}
                     <div className="flex items-center gap-2">
                       <Link href="/create">
-                        <div className={`p-2 transition-colors cursor-pointer ${
-                          isCreatePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
-                        }`}>
+                        <div className={`p-2 transition-colors cursor-pointer ${isCreatePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
+                          }`}>
                           <Brush size={24} />
                         </div>
                       </Link>
-                      
+
                       <Link href="/catalogue">
-                        <div className={`p-2 transition-colors cursor-pointer ${
-                          isCataloguePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
-                        }`}>
+                        <div className={`p-2 transition-colors cursor-pointer ${isCataloguePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
+                          }`}>
                           <Store size={24} />
                         </div>
                       </Link>
-                      
+
                       <button
                         onClick={() => window.dispatchEvent(new CustomEvent('openLoginModal'))}
                         className={`p-2 transition-colors cursor-pointer text-white hover:text-[#f1b917]`}
@@ -191,7 +189,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Horizontal line for unauthenticated users */}
                   <div className="w-full h-px bg-white mt-3"></div>
                 </div>
@@ -203,44 +201,49 @@ export default function Navigation({ transparent = false }: NavigationProps) {
               <div className="flex items-center justify-between sm:justify-between">
                 <div className="flex-shrink-0 sm:block" style={{ maxWidth: "40%" }}>
                   <Link href="/" className="inline-block">
-                    <h1 className="hidden sm:block text-3xl sm:text-4xl md:text-5xl lg:text-6xl cursor-pointer tracking-normal leading-tight font-racing-sans whitespace-nowrap text-white">
+                    <h1 className="block text-3xl sm:text-4xl md:text-5xl lg:text-6xl cursor-pointer tracking-normal leading-tight font-racing-sans whitespace-nowrap text-white">
                       {isDashboardPage ? 'Dashboard' : 'Settings'}
                     </h1>
                   </Link>
                 </div>
-                
+
                 {hasUserSession && (
-                  <div className="flex items-center gap-3 sm:gap-2 flex-shrink-0 w-full sm:w-auto justify-center sm:justify-end">
-                    <NavIcon href="/feed" active={isFeedPage}>
-                      <Play size={24} />
-                    </NavIcon>
-                    
-                    <NavIcon href="/create" active={isCreatePage}>
-                      <Brush size={24} />
-                    </NavIcon>
-                    
-                    <NavIcon href="/catalogue" active={isCataloguePage}>
-                      <Store size={24} />
-                    </NavIcon>
-                    
-                    <NavIcon href="/dashboard" active={isDashboardPage}>
-                      <User size={24} />
-                    </NavIcon>
-                    
-                    {/* <NavIcon href="/settings" active={isSettingsPage}>
+                  !isMobile ? (
+                    <div className="flex items-center gap-3 sm:gap-2 flex-shrink-0 w-full sm:w-auto justify-center sm:justify-end">
+                      <NavIcon href="/winners" active={isFeedPage}>
+                        <Play size={24} />
+                      </NavIcon>
+
+                      <NavIcon href="/create" active={isCreatePage}>
+                        <Brush size={24} />
+                      </NavIcon>
+
+                      <NavIcon href="/catalogue" active={isCataloguePage}>
+                        <Store size={24} />
+                      </NavIcon>
+
+                      <NavIcon href="/dashboard" active={isDashboardPage}>
+                        <User size={24} />
+                      </NavIcon>
+
+                      {/* <NavIcon href="/settings" active={isSettingsPage}>
                       <Settings size={24} />
                     </NavIcon> */}
-                    
-                    <button
-                      onClick={logout}
-                      className="p-2 text-white hover:text-red-400 transition-colors cursor-pointer"
-                    >
-                      <LogOut size={24} />
-                    </button>
-                  </div>
+
+                      <button
+                        onClick={logout}
+                        className="p-2 text-white hover:text-red-400 transition-colors cursor-pointer"
+                      >
+                        <LogOut size={24} />
+                      </button>
+                    </div>) : (
+                    <NavIcon href="/settings" active={isSettingsPage}>
+                      <Settings size={24} />
+                    </NavIcon>
+                  )
                 )}
               </div>
-              
+
               {/* Horizontal line spanning from Dashboard/Settings title to logout button */}
               {hasUserSession && (
                 <div className="w-full h-px bg-white mt-3"></div>
@@ -270,9 +273,9 @@ export default function Navigation({ transparent = false }: NavigationProps) {
               </div>
             </div>
           )}
-          
 
-          
+
+
           {!isCataloguePage && !isDashboardPage && !isSettingsPage && !isCreatePage && !isEarnPage && (
             <div className="flex flex-col items-center justify-center mt-2 mb-1">
             </div>

@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import DashboardImageModal from "@/components/DashboardImageModal";
 import ShareModal from "@/components/ShareModal";
 import SubscriptionModal from "@/components/SubscriptionModal";
+import { useIsMobile } from "@/hooks/use-mobile";
+import BottomNavigation from "@/components/BottomNavigation";
 
 interface UserImage {
   id: string;
@@ -29,6 +31,7 @@ export default function Dashboard() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareImageUrl, setShareImageUrl] = useState("");
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   // Redirect unauthenticated users to create page
   useEffect(() => {
@@ -156,7 +159,7 @@ export default function Dashboard() {
         )}
       </main>
 
-      <Footer showTopLine={true} />
+      {!isMobile ? <Footer showTopLine={true} /> : <BottomNavigation />}
 
 
 

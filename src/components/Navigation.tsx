@@ -255,13 +255,13 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                     <span className="text-white">Coffee&</span><span className="text-[#f1b917]">Prints</span>
                   </h1>
                 </Link>
-                {isCataloguePage && (
+                {!isMobile && isCataloguePage && (
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Catalogue</span>
                 )}
-                {isFeedPage && (
+                {!isMobile && isFeedPage && (
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Moments</span>
                 )}
-                {isCreatePage && (
+                {!isMobile && isCreatePage && (
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Create</span>
                 )}
                 {/* {isPartnersPage && (

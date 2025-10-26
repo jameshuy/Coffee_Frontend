@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { User, LogOut, Brush, Settings, Store, Play } from 'lucide-react';
+import { Home, Camera, Layers, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiRequest } from '@/lib/queryClient';
@@ -129,15 +129,15 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                     {/* Navigation icons */}
                     <div className="flex items-center gap-2">
                       <NavIcon href="/feed" active={isFeedPage}>
-                        <Play size={24} />
+                        <Home size={24} />
                       </NavIcon>
 
                       <NavIcon href="/create" active={isCreatePage}>
-                        <Brush size={24} />
+                        <Camera size={24} />
                       </NavIcon>
 
                       <NavIcon href="/catalogue" active={isCataloguePage}>
-                        <Store size={24} />
+                        <Layers size={24} />
                       </NavIcon>
 
                       <NavIcon href="/dashboard" active={isDashboardPage}>
@@ -170,14 +170,14 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                       <Link href="/create">
                         <div className={`p-2 transition-colors cursor-pointer ${isCreatePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
                           }`}>
-                          <Brush size={24} />
+                          <Camera size={24} />
                         </div>
                       </Link>
 
                       <Link href="/catalogue">
                         <div className={`p-2 transition-colors cursor-pointer ${isCataloguePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
                           }`}>
-                          <Store size={24} />
+                          <Layers size={24} />
                         </div>
                       </Link>
 
@@ -211,15 +211,15 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                   !isMobile ? (
                     <div className="flex items-center gap-3 sm:gap-2 flex-shrink-0 w-full sm:w-auto justify-center sm:justify-end">
                       <NavIcon href="/winners" active={isFeedPage}>
-                        <Play size={24} />
+                        <Home size={24} />
                       </NavIcon>
 
                       <NavIcon href="/create" active={isCreatePage}>
-                        <Brush size={24} />
+                        <Camera size={24} />
                       </NavIcon>
 
                       <NavIcon href="/catalogue" active={isCataloguePage}>
-                        <Store size={24} />
+                        <Layers size={24} />
                       </NavIcon>
 
                       <NavIcon href="/dashboard" active={isDashboardPage}>

@@ -5,12 +5,15 @@ import { trackEvent } from "@/lib/analytics";
 import FeedContent from "@/components/FeedContent";
 import { LoginModal } from "@/components/LoginModal";
 import { SignUpModal } from "@/components/SignUpModal";
+import BottomNavigation from "@/components/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Feed() {
   
   // Modal states for unauthenticated users
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   // Track page visit
   useEffect(() => {
@@ -56,7 +59,7 @@ export default function Feed() {
 
 
 
-      <Footer />
+      {isMobile ? <Footer /> : <BottomNavigation />}
 
       {/* Login Modal */}
       <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen} />

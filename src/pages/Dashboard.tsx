@@ -83,7 +83,7 @@ export default function Dashboard() {
   // Unauthenticated users are redirected to /create page via useEffect above
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col pb-16">
       <Navigation />
 
       <main className="flex-grow container mx-auto px-4 pt-28 pb-6 relative">

@@ -59,7 +59,7 @@ export default function Feed() {
 
 
 
-      {isMobile ? <Footer /> : <BottomNavigation />}
+      {!isMobile ? <Footer /> : <BottomNavigation />}
 
       {/* Login Modal */}
       <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen} />

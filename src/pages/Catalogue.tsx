@@ -4,7 +4,7 @@ import CatalogueGrid from "@/components/CatalogueGrid";
 import CartCheckoutModal from "@/components/CartCheckoutModal";
 import ShareModal from "@/components/ShareModal";
 import { useState, useEffect, useCallback } from "react";
-import { ShoppingCart, User, Search, Play } from "lucide-react";
+import { ShoppingCart, User, Search, Home } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
@@ -118,7 +118,7 @@ export default function Catalogue() {
 
               {/* Feed Icon */}
               <Link href="/feed" className="p-2 text-white hover:text-[#f1b917] transition-colors z-10" aria-label="Go to feed">
-                <Play size={24} />
+                <Home size={24} />
               </Link>
 
               <Link href="/dashboard" className="p-2 text-white hover:text-[#f1b917] transition-colors z-10" aria-label="Go to dashboard">

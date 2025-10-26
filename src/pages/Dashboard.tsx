@@ -86,7 +86,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-black flex flex-col">
       <Navigation />
 
-      <main className="flex-grow container mx-auto px-4 pt-1 pb-6 relative">
+      <main className="flex-grow container mx-auto px-4 pt-28 pb-6 relative">
 
 
         {/* User's generated images grid */}

@@ -90,7 +90,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
   }, [triggerFetchIfNeeded]);
 
   return (
-    <nav className={`${transparent ? 'bg-transparent' : 'bg-black'} shadow-sm pt-3 pb-2`}>
+    <nav className={`${isLandingPage ? '' : 'fixed top-0 left-0 right-0 z-40'} ${transparent ? 'bg-transparent' : 'bg-black'} shadow-sm pt-3 pb-2`}>
       <div className="container mx-auto px-4">
         <div className={`w-full relative ${isMobile && !isLandingPage ? 'border-b' : ''}`}>
           {isCreatePage || isFeedPage ? (

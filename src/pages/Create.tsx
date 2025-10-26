@@ -28,6 +28,8 @@ import { RotateCcw, Tag, Share2, ArrowLeft } from "lucide-react";
 import { preventImageDownload } from "@/lib/image-protection";
 import { useCreateFlow } from "@/hooks/useCreateFlow";
 import { useOrderFlow } from "@/hooks/useOrderFlow";
+import { useIsMobile } from "@/hooks/use-mobile";
+import BottomNavigation from "@/components/BottomNavigation";
 
 type Step = "upload" | "customize" | "shipping";
 
@@ -43,6 +45,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 export default function Create() {
   // Authentication state
   const { isAuthenticated, user } = useAuth();
+  const isMobile = useIsMobile();
 
   // Use the custom hook for poster creation logic
   const {
@@ -297,7 +300,7 @@ export default function Create() {
   const [paymentReady, setPaymentReady] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
   const [confirmationId, setConfirmationId] = useState<string | null>(null);
-  
+
   // Filter styles based on subscription status
   const getAvailableStyles = () => {
     // Check if user is an active artistic collective member
@@ -436,34 +439,34 @@ export default function Create() {
                           />
                         ) : (
                           formData.uploadedImage &&
-                            step === "upload" &&
-                            !isPosterGenerated &&
-                            !isGeneratingPoster && (
-                              <div className="w-full -mt-1">
-                                {/* Subheading for style selection - only show when styles are visible */}
-                                {showStyles && (
-                                  <h3 className="text-white text-xl font-racing-sans text-center mb-4">
-                                    Scroll to pick a print style
-                                  </h3>
-                                )}
-      
-                                {/* Negative margin to move it up slightly */}
-                                <StyleSelector
-                                  styles={availableStyles}
-                                  selectedStyle={selectedStyle}
-                                  onSelectStyle={setSelectedStyle}
-                                  showAsButton={!showStyles}
-                                  onPickStyleClick={() => setShowStyles(true)}
-                                />
-                              </div>
-                            )
+                          step === "upload" &&
+                          !isPosterGenerated &&
+                          !isGeneratingPoster && (
+                            <div className="w-full -mt-1">
+                              {/* Subheading for style selection - only show when styles are visible */}
+                              {showStyles && (
+                                <h3 className="text-white text-xl font-racing-sans text-center mb-4">
+                                  Scroll to pick a print style
+                                </h3>
+                              )}
+
+                              {/* Negative margin to move it up slightly */}
+                              <StyleSelector
+                                styles={availableStyles}
+                                selectedStyle={selectedStyle}
+                                onSelectStyle={setSelectedStyle}
+                                showAsButton={!showStyles}
+                                onPickStyleClick={() => setShowStyles(true)}
+                              />
+                            </div>
+                          )
                         )
                       )}
                       {/* "Create Another Poster" button has been moved out of this container */}
                     </div>
 
                     {/* Show style selector based on showStyles state */}
-                    
+
                   </>
                 )}
               </div>
@@ -884,7 +887,7 @@ export default function Create() {
                         }}
                       >
                         <CheckoutForm
-                          onPaymentComplete={(paymentIntentId) => 
+                          onPaymentComplete={(paymentIntentId) =>
                             handlePaymentComplete(
                               paymentIntentId,
                               generatedPosterUrl || undefined,
@@ -990,7 +993,7 @@ export default function Create() {
           </div>
         </main>
 
-        <Footer showTopLine={true} />
+        {!isMobile ? <Footer showTopLine={true} /> : <BottomNavigation />}
       </>
       {/* Subscription Modal */}
       <SubscriptionModal

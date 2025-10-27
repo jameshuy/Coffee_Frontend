@@ -161,7 +161,7 @@ export default function LandingPageContent() {
       </div>
       {/* Start button - redirects to catalogue page */}
       <div className="flex flex-row items-center justify-center w-full">
-        <Link href="/catalogue">
+        <Link href="/feed">
           <button
             className="bg-white text-black px-16 py-2 rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-lg"
             onClick={() => {

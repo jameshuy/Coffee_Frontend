@@ -23,44 +23,44 @@ export default function BottomNavigation() {
                 <div className="w-full h-[1px] bg-white"></div>
             </div>
             <div className="flex justify-center items-center gap-6 py-3">
-                {isAuthenticated && (
-                    <>
-                        <Link href="/feed">
-                            <div className={`p-2 transition-colors cursor-pointer ${isFeedPage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
-                                }`}>
-                                <Home size={24} />
-                            </div>
-                        </Link>
+                <>
+                    <Link href="/feed">
+                        <div className={`p-2 transition-colors cursor-pointer ${isFeedPage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
+                            }`}>
+                            <Home size={24} />
+                        </div>
+                    </Link>
 
-                        <Link href="/create">
-                            <div className={`p-2 transition-colors cursor-pointer ${isCreatePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
-                                }`}>
-                                <Camera size={24} />
-                            </div>
-                        </Link>
+                    <Link href="/create">
+                        <div className={`p-2 transition-colors cursor-pointer ${isCreatePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
+                            }`}>
+                            <Camera size={24} />
+                        </div>
+                    </Link>
 
-                        <Link href="/catalogue">
-                            <div className={`p-2 transition-colors cursor-pointer ${isCataloguePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
-                                }`}>
-                                <Layers size={24} />
-                            </div>
-                        </Link>
+                    <Link href="/catalogue">
+                        <div className={`p-2 transition-colors cursor-pointer ${isCataloguePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
+                            }`}>
+                            <Layers size={24} />
+                        </div>
+                    </Link>
 
-                        <Link href="/dashboard">
-                            <div className={`p-2 transition-colors cursor-pointer ${isDashboardPage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
-                                }`}>
-                                <User size={24} />
-                            </div>
-                        </Link>
+                    <Link href="/dashboard">
+                        <div className={`p-2 transition-colors cursor-pointer ${isDashboardPage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
+                            }`}>
+                            <User size={24} />
+                        </div>
+                    </Link>
 
+                    {isAuthenticated &&
                         <button
                             onClick={logout}
                             className="p-2 text-white hover:text-red-400 transition-colors cursor-pointer"
                         >
                             <LogOut size={24} />
                         </button>
-                    </>
-                )}
+                    }
+                </>
             </div>
         </div>
     );

@@ -45,7 +45,7 @@ export default function Feed() {
     <div className="flex flex-col min-h-screen bg-black overflow-hidden relative">
       <Navigation />
 
-      <main className="flex-grow container mx-auto px-4 py-0 md:py-2 flex flex-col items-center justify-center text-white">
+      <main className={`flex-grow container mx-auto px-4 py-0 md:py-2 flex flex-col items-center justify-center text-white ${!isMobile && 'mt-36 pt-8'}`}>
         <div className="w-full max-w-4xl">
           <div className="flex flex-col items-center">
             <div className="mx-auto w-full -mt-1">

@@ -314,20 +314,6 @@ export default function SellPosterModal({
               />
             </div>
 
-            {/* Link to Moment Section */}
-            <div className="space-y-2">
-              <Label htmlFor="momentLink" className="text-white text-sm font-medium">Link to Moment (optional)</Label>
-              <Input
-                id="momentLink"
-                type="url"
-                value={momentLink}
-                onChange={(e) => setMomentLink(e.target.value)}
-                className="bg-gray-900 border-gray-700 text-white"
-                placeholder="Instagram, TikTok, YouTube or other links"
-                maxLength={500}
-              />
-            </div>
-
             {/* City Section */}
             <div className="space-y-2">
               <Label htmlFor="city" className="text-white text-sm font-medium">Enter city</Label>

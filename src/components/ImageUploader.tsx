@@ -9,6 +9,8 @@ import { preventImageDownload } from '@/lib/image-protection';
 import TextOverlayTool from './TextOverlayTool';
 import { useDeviceInfo } from '@/hooks/check-device';
 
+const isInApp = () => typeof window !== 'undefined' && !!window.ReactNativeWebView;
+
 interface TextOverlay {
   text: string;
   position: { x: number; y: number };
@@ -62,17 +64,26 @@ export default function ImageUploader({
 
   useEffect(() => {
     // Only auto-open camera on mobile and when no uploaded image exists
-    if (deviceInfo.isMobile && !isGenerated) {
-      const openCamera = setTimeout(() => {
-        const cameraInput = document.getElementById('cameraInput') as HTMLInputElement | null;
-        if (cameraInput) {
-          cameraInput.click();
-        }
-      }, 800); // small delay for page transition to settle
+    if (isMobile && !isGenerated) {
+      if (isInApp()) {
+        console.log('📱 Sending openCamera to native app');
+        window.ReactNativeWebView?.postMessage('openCamera');
+      } else {
+        console.log('📱 Opening camera via web input');
+        const openCamera = setTimeout(() => {
+          const cameraInput = document.getElementById('cameraInput') as HTMLInputElement | null;
+          if (cameraInput) {
+            console.log('📱 Clicking camera input');
+            cameraInput.click();
+          } else {
+            console.log('📱 Camera input not found');
+          }
+        }, 800); // small delay for page transition to settle
 
-      return () => clearTimeout(openCamera);
+        return () => clearTimeout(openCamera);
+      }
     }
-  }, [deviceInfo, isGenerated]);
+  }, [isMobile, isGenerated]);
 
   // Calculate and update container height based on viewport
   useEffect(() => {
@@ -527,7 +538,7 @@ export default function ImageUploader({
             <input {...getInputProps()} capture="environment" />
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center gap-2">
               {
-                deviceInfo.isMobile && (
+                isMobile && (
                   <Button onClick={(e) => { e.stopPropagation(); document.getElementById('cameraInput')?.click() }} className='w-full inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-5 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-base'>
                     Take Photo
                   </Button>

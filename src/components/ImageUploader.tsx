@@ -63,6 +63,22 @@ export default function ImageUploader({
   const deviceInfo = useDeviceInfo();
 
   useEffect(() => {
+    const listener = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'image' && data.uri) {
+          console.log('📸 Received image from native camera:', data.uri);
+          onImageUpload(data.uri);
+        }
+      } catch (err) {
+        // ignore invalid JSON
+      }
+    };
+    window.addEventListener('message', listener);
+    return () => window.removeEventListener('message', listener);
+  }, [onImageUpload]);
+
+  useEffect(() => {
     // Only auto-open camera on mobile and when no uploaded image exists
     if (isMobile && !isGenerated) {
       if (isInApp()) {

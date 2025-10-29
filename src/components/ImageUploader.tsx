@@ -62,128 +62,6 @@ export default function ImageUploader({
   const isMobile = useIsMobile();
   const deviceInfo = useDeviceInfo();
 
-  useEffect(() => {
-    const listener = (event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'image' && data.uri) {
-          console.log('📸 Received image from native camera:', data.uri);
-          onImageUpload(data.uri);
-        }
-      } catch (err) {
-        // ignore invalid JSON
-      }
-    };
-    window.addEventListener('message', listener);
-    return () => window.removeEventListener('message', listener);
-  }, [onImageUpload]);
-
-  useEffect(() => {
-    // Only auto-open camera on mobile and when no uploaded image exists
-    if (isMobile && !isGenerated) {
-      if (isInApp()) {
-        console.log('📱 Sending openCamera to native app');
-        window.ReactNativeWebView?.postMessage('openCamera');
-      } else {
-        console.log('📱 Opening camera via web input');
-        const openCamera = setTimeout(() => {
-          const cameraInput = document.getElementById('cameraInput') as HTMLInputElement | null;
-          if (cameraInput) {
-            console.log('📱 Clicking camera input');
-            cameraInput.click();
-          } else {
-            console.log('📱 Camera input not found');
-          }
-        }, 800); // small delay for page transition to settle
-
-        return () => clearTimeout(openCamera);
-      }
-    }
-  }, [isMobile, isGenerated]);
-
-  // Calculate and update container height based on viewport
-  useEffect(() => {
-    const calculateHeight = () => {
-      // If we have a generated image that's fully loaded, use the larger height calculation (80% of viewport)
-      if (isGenerated) {
-        // A3 aspect ratio is 1:1.414 (portrait)
-        const maxViewportHeight = window.innerHeight * 0.8; // Use 80% of viewport height
-        const maxWidth = isMobile ? window.innerWidth * 0.95 : window.innerWidth * 0.65; // Use less width on mobile
-
-        // Calculate height based on A3 aspect ratio (width / 0.707)
-        const heightBasedOnWidth = maxWidth / 0.707;
-
-        // Use the smaller of the two to ensure it fits on screen
-        const optimalHeight = Math.min(maxViewportHeight, heightBasedOnWidth);
-
-        setContainerHeight(optimalHeight);
-      } else {
-        // For initial upload state, use the same size as the video box (350px max-width)
-        // A3 aspect ratio applied to 350px width = 495px height
-        setContainerHeight(495);
-      }
-    };
-
-    // Calculate initially and on resize
-    calculateHeight();
-    window.addEventListener('resize', calculateHeight);
-
-    return () => {
-      window.removeEventListener('resize', calculateHeight);
-      // Clean up any pending poster timeout
-      if (posterTimeoutRef.current) {
-        clearTimeout(posterTimeoutRef.current);
-        posterTimeoutRef.current = null;
-      }
-    };
-  }, [isMobile, isGenerated]);
-
-  // Reset image loaded state when generation starts, but preserve state when showing a generated image
-  useEffect(() => {
-    if (isGenerating) {
-      setGeneratedImageLoaded(false);
-    }
-  }, [isGenerating]);
-
-  // Ensure generated state is properly applied when the component switches to isGenerated=true
-  // Also handle merged videos for video uploads
-  useEffect(() => {
-    if (isGenerated && !isGenerating && uploadedImage) {
-      // Small delay before applying the animation effect
-      const timer = setTimeout(() => {
-        setGeneratedImageLoaded(true);
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-  }, [isGenerated, isGenerating, uploadedImage]);
-
-  // Create video object URL for display and handle cleanup
-  useEffect(() => {
-    if (uploadedVideo) {
-      const url = URL.createObjectURL(uploadedVideo);
-      setVideoObjectUrl(url);
-      setShowVideoTransition(true);
-
-      return () => {
-        URL.revokeObjectURL(url);
-        setVideoObjectUrl(null);
-      };
-    } else {
-      setShowVideoTransition(false);
-      setVideoObjectUrl(null);
-    }
-  }, [uploadedVideo]);
-
-  // Keep showing video transition even after generation completes
-  // The video will loop and show the poster at the selected frame
-  useEffect(() => {
-    if (isGenerated && uploadedVideo && !isGenerating) {
-      // Keep video transition active to show the frame-perfect loop
-      setShowVideoTransition(true);
-    }
-  }, [isGenerated, uploadedVideo, isGenerating]);
-
-  // Animation is now handled by the className and css transition properties
 
   // Auto-scroll function to position image at top of viewport
   const scrollToImageTop = useCallback(() => {
@@ -202,93 +80,6 @@ export default function ImageUploader({
       }, 100);
     }
   }, [containerRef]);
-
-  // Video file handling function
-  const handleVideoFile = useCallback(async (file: File) => {
-    console.log("VIDEO FILE INFO:", {
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-      lastModified: new Date(file.lastModified).toISOString()
-    });
-
-    setIsLoading(true);
-
-    try {
-      // Create video element to check duration
-      const video = document.createElement('video');
-      const videoUrl = URL.createObjectURL(file);
-
-      video.src = videoUrl;
-      video.preload = 'metadata';
-
-      await new Promise((resolve, reject) => {
-        video.onloadedmetadata = () => {
-          console.log("VIDEO METADATA:", {
-            duration: video.duration,
-            videoWidth: video.videoWidth,
-            videoHeight: video.videoHeight
-          });
-
-          // Check duration limit
-          if (video.duration > MAX_VIDEO_DURATION) {
-            const durationSeconds = Math.round(video.duration);
-            trackEvent('Video', 'upload_rejected_duration', `${durationSeconds}s`);
-            toast({
-              title: "Video Too Long",
-              description: `Video must be ${MAX_VIDEO_DURATION} seconds or shorter. Your video is ${durationSeconds} seconds.`,
-              variant: "destructive",
-              duration: 5000
-            });
-
-            URL.revokeObjectURL(videoUrl);
-            setIsLoading(false);
-
-            if (onImageError) {
-              onImageError();
-            }
-            reject(new Error('Video too long'));
-            return;
-          }
-
-          resolve(null);
-        };
-
-        video.onerror = () => {
-          trackEvent('Video', 'upload_error', 'metadata_load_failed');
-          toast({
-            title: "Video Error",
-            description: "Unable to process this video file. Please try a different video.",
-            variant: "destructive",
-            duration: 5000
-          });
-
-          URL.revokeObjectURL(videoUrl);
-          setIsLoading(false);
-
-          if (onImageError) {
-            onImageError();
-          }
-          reject(new Error('Video load failed'));
-        };
-      });
-
-      // Video is valid, call the upload handler
-      trackEvent('Video', 'upload_success', file.type);
-
-      if (onVideoUpload) {
-        onVideoUpload(file);
-      }
-
-      // Clean up
-      URL.revokeObjectURL(videoUrl);
-      setIsLoading(false);
-
-    } catch (error) {
-      console.error("Error processing video:", error);
-      setIsLoading(false);
-    }
-  }, [onVideoUpload, onImageError]);
 
   const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
     // Handle rejected files (larger than 8MB or wrong type)
@@ -504,6 +295,230 @@ export default function ImageUploader({
       reader.readAsDataURL(file);
     }
   }, [onImageUpload, scrollToImageTop]);
+
+
+  useEffect(() => {
+    const listener = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'image' && data.uri) {
+          console.log('📸 Received image from native camera:', data.uri);
+
+          // Convert base64 to a File-like object for uniform handling
+          const byteString = atob(data.uri.split(',')[1]);
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+          }
+          const blob = new Blob([ab], { type: 'image/jpeg' });
+          const file = new File([blob], 'camera_capture.jpg', { type: 'image/jpeg' });
+
+          // Pass it to the same onDrop pipeline
+          onDrop([file], []);
+        }
+      } catch (err) {
+        console.warn("Failed to parse native message", err);
+      }
+    };
+    window.addEventListener('message', listener);
+    return () => window.removeEventListener('message', listener);
+  }, [onDrop]);
+
+  useEffect(() => {
+    // Only auto-open camera on mobile and when no uploaded image exists
+    if (isMobile && !isGenerated) {
+      if (isInApp()) {
+        console.log('📱 Sending openCamera to native app');
+        window.ReactNativeWebView?.postMessage('openCamera');
+      } else {
+        console.log('📱 Opening camera via web input');
+        const openCamera = setTimeout(() => {
+          const cameraInput = document.getElementById('cameraInput') as HTMLInputElement | null;
+          if (cameraInput) {
+            console.log('📱 Clicking camera input');
+            cameraInput.click();
+          } else {
+            console.log('📱 Camera input not found');
+          }
+        }, 800); // small delay for page transition to settle
+
+        return () => clearTimeout(openCamera);
+      }
+    }
+  }, [isMobile, isGenerated]);
+
+  // Calculate and update container height based on viewport
+  useEffect(() => {
+    const calculateHeight = () => {
+      // If we have a generated image that's fully loaded, use the larger height calculation (80% of viewport)
+      if (isGenerated) {
+        // A3 aspect ratio is 1:1.414 (portrait)
+        const maxViewportHeight = window.innerHeight * 0.8; // Use 80% of viewport height
+        const maxWidth = isMobile ? window.innerWidth * 0.95 : window.innerWidth * 0.65; // Use less width on mobile
+
+        // Calculate height based on A3 aspect ratio (width / 0.707)
+        const heightBasedOnWidth = maxWidth / 0.707;
+
+        // Use the smaller of the two to ensure it fits on screen
+        const optimalHeight = Math.min(maxViewportHeight, heightBasedOnWidth);
+
+        setContainerHeight(optimalHeight);
+      } else {
+        // For initial upload state, use the same size as the video box (350px max-width)
+        // A3 aspect ratio applied to 350px width = 495px height
+        setContainerHeight(495);
+      }
+    };
+
+    // Calculate initially and on resize
+    calculateHeight();
+    window.addEventListener('resize', calculateHeight);
+
+    return () => {
+      window.removeEventListener('resize', calculateHeight);
+      // Clean up any pending poster timeout
+      if (posterTimeoutRef.current) {
+        clearTimeout(posterTimeoutRef.current);
+        posterTimeoutRef.current = null;
+      }
+    };
+  }, [isMobile, isGenerated]);
+
+  // Reset image loaded state when generation starts, but preserve state when showing a generated image
+  useEffect(() => {
+    if (isGenerating) {
+      setGeneratedImageLoaded(false);
+    }
+  }, [isGenerating]);
+
+  // Ensure generated state is properly applied when the component switches to isGenerated=true
+  // Also handle merged videos for video uploads
+  useEffect(() => {
+    if (isGenerated && !isGenerating && uploadedImage) {
+      // Small delay before applying the animation effect
+      const timer = setTimeout(() => {
+        setGeneratedImageLoaded(true);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isGenerated, isGenerating, uploadedImage]);
+
+  // Create video object URL for display and handle cleanup
+  useEffect(() => {
+    if (uploadedVideo) {
+      const url = URL.createObjectURL(uploadedVideo);
+      setVideoObjectUrl(url);
+      setShowVideoTransition(true);
+
+      return () => {
+        URL.revokeObjectURL(url);
+        setVideoObjectUrl(null);
+      };
+    } else {
+      setShowVideoTransition(false);
+      setVideoObjectUrl(null);
+    }
+  }, [uploadedVideo]);
+
+  // Keep showing video transition even after generation completes
+  // The video will loop and show the poster at the selected frame
+  useEffect(() => {
+    if (isGenerated && uploadedVideo && !isGenerating) {
+      // Keep video transition active to show the frame-perfect loop
+      setShowVideoTransition(true);
+    }
+  }, [isGenerated, uploadedVideo, isGenerating]);
+
+  // Animation is now handled by the className and css transition properties
+
+
+  // Video file handling function
+  const handleVideoFile = useCallback(async (file: File) => {
+    console.log("VIDEO FILE INFO:", {
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      lastModified: new Date(file.lastModified).toISOString()
+    });
+
+    setIsLoading(true);
+
+    try {
+      // Create video element to check duration
+      const video = document.createElement('video');
+      const videoUrl = URL.createObjectURL(file);
+
+      video.src = videoUrl;
+      video.preload = 'metadata';
+
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = () => {
+          console.log("VIDEO METADATA:", {
+            duration: video.duration,
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight
+          });
+
+          // Check duration limit
+          if (video.duration > MAX_VIDEO_DURATION) {
+            const durationSeconds = Math.round(video.duration);
+            trackEvent('Video', 'upload_rejected_duration', `${durationSeconds}s`);
+            toast({
+              title: "Video Too Long",
+              description: `Video must be ${MAX_VIDEO_DURATION} seconds or shorter. Your video is ${durationSeconds} seconds.`,
+              variant: "destructive",
+              duration: 5000
+            });
+
+            URL.revokeObjectURL(videoUrl);
+            setIsLoading(false);
+
+            if (onImageError) {
+              onImageError();
+            }
+            reject(new Error('Video too long'));
+            return;
+          }
+
+          resolve(null);
+        };
+
+        video.onerror = () => {
+          trackEvent('Video', 'upload_error', 'metadata_load_failed');
+          toast({
+            title: "Video Error",
+            description: "Unable to process this video file. Please try a different video.",
+            variant: "destructive",
+            duration: 5000
+          });
+
+          URL.revokeObjectURL(videoUrl);
+          setIsLoading(false);
+
+          if (onImageError) {
+            onImageError();
+          }
+          reject(new Error('Video load failed'));
+        };
+      });
+
+      // Video is valid, call the upload handler
+      trackEvent('Video', 'upload_success', file.type);
+
+      if (onVideoUpload) {
+        onVideoUpload(file);
+      }
+
+      // Clean up
+      URL.revokeObjectURL(videoUrl);
+      setIsLoading(false);
+
+    } catch (error) {
+      console.error("Error processing video:", error);
+      setIsLoading(false);
+    }
+  }, [onVideoUpload, onImageError]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

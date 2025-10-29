@@ -325,28 +325,41 @@ export default function ImageUploader({
     return () => window.removeEventListener('message', listener);
   }, [onDrop]);
 
+  const hasAutoOpenedRef = useRef(false);
   useEffect(() => {
-    // Only auto-open camera on mobile and when no uploaded image exists
-    if (isMobile && !isGenerated) {
-      if (isInApp()) {
-        console.log('📱 Sending openCamera to native app');
-        window.ReactNativeWebView?.postMessage('openCamera');
-      } else {
-        console.log('📱 Opening camera via web input');
-        const openCamera = setTimeout(() => {
-          const cameraInput = document.getElementById('cameraInput') as HTMLInputElement | null;
-          if (cameraInput) {
-            console.log('📱 Clicking camera input');
-            cameraInput.click();
-          } else {
-            console.log('📱 Camera input not found');
-          }
-        }, 800); // small delay for page transition to settle
+    // iOS fix: avoid re-opening camera when switching from styles back to uploader
+    // Only auto-open once, on initial mount, when not generating and no media selected
+    const shouldAutoOpen =
+      isMobile &&
+      !isGenerated &&
+      !isGenerating &&
+      uploadedImage == null &&
+      uploadedVideo == null &&
+      !hasAutoOpenedRef.current;
 
-        return () => clearTimeout(openCamera);
-      }
+    if (!shouldAutoOpen) return;
+
+    hasAutoOpenedRef.current = true;
+
+    if (isInApp()) {
+      console.log('📱 Sending openCamera to native app');
+      window.ReactNativeWebView?.postMessage('openCamera');
+      return;
     }
-  }, [isMobile, isGenerated]);
+
+    console.log('📱 Opening camera via web input');
+    const openCamera = setTimeout(() => {
+      const cameraInput = document.getElementById('cameraInput') as HTMLInputElement | null;
+      if (cameraInput) {
+        console.log('📱 Clicking camera input');
+        cameraInput.click();
+      } else {
+        console.log('📱 Camera input not found');
+      }
+    }, 800); // small delay for page transition to settle
+
+    return () => clearTimeout(openCamera);
+  }, [isMobile, isGenerated, isGenerating, uploadedImage, uploadedVideo]);
 
   // Calculate and update container height based on viewport
   useEffect(() => {

@@ -262,7 +262,7 @@ export default function DashboardImageModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className={`top-[50%] translate-y-[-50%] sm:max-w-4xl max-h-[90vh] bg-black border-gray-800 p-0 ${
+        <DialogContent className={`top-[50%] translate-y-[-50%] sm:max-w-4xl max-h-[90vh] bg-black border-gray-800 p-0 [&>button]:hidden ${
           orderStep !== "idle" ? "overflow-y-auto" : "overflow-hidden"
         }`}>
           <VisuallyHidden>
@@ -288,7 +288,7 @@ export default function DashboardImageModal({
             </button>
           )}
 
-        <div className="flex flex-col items-center space-y-6 p-6">
+        <div className="flex flex-col items-center space-y-6 md:p-6 py-2">
           {/* Image container */}
           <div className="flex justify-center items-center min-h-[300px]">
             {/* Loading spinner */}
@@ -339,11 +339,11 @@ export default function DashboardImageModal({
           </div>
           
           {/* Order, Publish/Unpublish, and Close button section */}
-          <div className="flex items-center justify-center space-x-4 mt-6 w-full max-w-md">
+          <div className="flex items-center justify-center space-x-1 md:space-x-4 mt-6 w-full max-w-md">
             {/* Order (A3) button */}
             {!orderCompleted && (
               <Button 
-                className="bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 flex items-center space-x-2"
+                className="px-2 md:px-4 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 flex items-center space-x-2"
                 onClick={handleOrderPoster}
                 disabled={orderStep !== "idle"}
               >
@@ -353,7 +353,7 @@ export default function DashboardImageModal({
             
             {/* Publish/Unpublish button - available to all users */}
             <Button 
-              className="bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 flex items-center space-x-2"
+              className="px-2 md:px-4 md:ml-0 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 flex items-center space-x-2"
               onClick={handlePublishToggle}
               disabled={togglePublicMutation.isPending}
             >

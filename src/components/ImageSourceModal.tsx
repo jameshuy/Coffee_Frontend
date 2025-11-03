@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
 import { Camera, Image as ImageIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
-import { useDeviceInfo } from "@/hooks/check-device";
 import { toast } from "@/hooks/use-toast";
 import { trackEvent, trackImageUpload } from "@/lib/analytics";
 import { useLocation } from "wouter";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type ImageSourceModalProps = {
     isOpen: boolean;
@@ -19,7 +19,7 @@ export const videoFileStorage = new Map<string, File>();
 let videoFileIdCounter = 0;
 
 export default function ImageSourceModal({ isOpen, onClose }: ImageSourceModalProps) {
-    const { isMobile } = useDeviceInfo();
+    const isMobile = useIsMobile();
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const libraryInputRef = useRef<HTMLInputElement>(null);
     const [location, navigate] = useLocation();
@@ -210,11 +210,15 @@ export default function ImageSourceModal({ isOpen, onClose }: ImageSourceModalPr
             <DialogContent
                 className={
                     // Bottom sheet styles
-                    "fixed inset-x-0 bottom-0 left-0 right-0 z-[90] w-full translate-x-0 translate-y-0 border-0 bg-zinc-900 text-white shadow-2xl p-0 sm:max-w-none sm:rounded-none sm:left-0 sm:top-auto sm:translate-x-0 sm:translate-y-0 " +
-                    // Rounded top and safe-area padding
-                    "rounded-t-2xl pb-[env(safe-area-inset-bottom)] " +
-                    // Slide up/down animations using radix data-state
-                    "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-1/2 data-[state=closed]:slide-out-to-bottom-1/2"
+                    "fixed z-[90] border-0 bg-zinc-900 text-white shadow-2xl p-0 rounded-t-2xl pb-[env(safe-area-inset-bottom)] overflow-hidden " +
+                    // Height-based animations
+                    "data-[state=open]:max-h-[400px] data-[state=closed]:max-h-0 " +
+                    "data-[state=open]:animate-height-expand data-[state=closed]:animate-height-collapse " +
+                    // Mobile: centered horizontally, bottom vertically
+                    (isMobile
+                        ? "left-1/2 bottom-0 w-[90%] max-w-sm -translate-x-1/2 "
+                        : "inset-x-0 bottom-0 left-0 right-0 w-full sm:max-w-none sm:rounded-none sm:left-0 sm:top-auto sm:translate-x-0"
+                    )
                 }
                 style={{ bottom: "calc(env(safe-area-inset-bottom) + 64px)" }}
             >

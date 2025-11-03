@@ -29,7 +29,7 @@ export default function BottomNavigation() {
 
     return (
         <>
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-black" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+            <div className="fixed bottom-0 left-0 right-0 z-[80] bg-black" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
                 <div className="container mx-auto px-4">
                     <div className="w-full h-[1px] bg-white"></div>
                 </div>

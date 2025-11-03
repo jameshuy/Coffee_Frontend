@@ -638,7 +638,7 @@ export default function Create() {
     const calculateHeight = () => {
       if (isPosterGenerated) {
         const maxViewportHeight = window.innerHeight * 0.8;
-        const maxWidth = mobileScreen ? window.innerWidth * 0.95 : window.innerWidth * 0.65;
+        const maxWidth = isMobile ? window.innerWidth * 0.95 : window.innerWidth * 0.65;
         const heightBasedOnWidth = maxWidth / 0.707;
         const optimalHeight = Math.min(maxViewportHeight, heightBasedOnWidth);
         setContainerHeight(optimalHeight);
@@ -649,7 +649,7 @@ export default function Create() {
     calculateHeight();
     window.addEventListener("resize", calculateHeight);
     return () => window.removeEventListener("resize", calculateHeight);
-  }, [mobileScreen, isPosterGenerated]);
+  }, [isMobile, isPosterGenerated]);
 
   // Reset image loaded state when generation starts
   useEffect(() => {

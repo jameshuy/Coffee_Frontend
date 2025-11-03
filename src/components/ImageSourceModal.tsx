@@ -218,7 +218,9 @@ export default function ImageSourceModal({ isOpen, onClose }: ImageSourceModalPr
                     (isMobile
                         ? "left-1/2 bottom-0 w-[90%] max-w-sm -translate-x-1/2 "
                         : "inset-x-0 bottom-0 left-0 right-0 w-full sm:max-w-none sm:rounded-none sm:left-0 sm:top-auto sm:translate-x-0"
-                    )
+                    ) +
+                    // Hide close button
+                    " [&>button]:hidden"
                 }
                 style={{ bottom: "calc(env(safe-area-inset-bottom) + 64px)" }}
             >

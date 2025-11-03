@@ -23,6 +23,10 @@ export default function BottomNavigation() {
     const handleCameraClick = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        // Don't open modal if we're already on the create page
+        if (isCreatePage) {
+            return;
+        }
         // Toggle modal - if open, close it; if closed, open it
         setIsImageSourceModalOpen(prev => !prev);
     };
@@ -45,7 +49,7 @@ export default function BottomNavigation() {
                         <Link href="/create">
                             <div
                                 onClick={handleCameraClick}
-                                className={`p-2 transition-colors cursor-pointer ${isCreatePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
+                                className={`p-2 transition-colors cursor-pointer ${isCreatePage ? 'text-[#f1b917] opacity-90' : 'text-white hover:text-[#f1b917]'
                                     }`}>
                                 <Camera size={24} />
                             </div>

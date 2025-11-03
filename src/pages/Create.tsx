@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { useLocation } from "wouter";
@@ -1086,7 +1086,7 @@ export default function Create() {
                   )}
                   <Button
                     className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center"
-                    onClick={handleCreateAnotherPoster}
+                    onClick={() => { window.history.back(); }}
                     aria-label="New Poster"
                   >
                     <RotateCcw size={16} />

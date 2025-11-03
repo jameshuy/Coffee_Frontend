@@ -244,7 +244,7 @@ export default function CartCheckoutModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[90vw] max-w-md sm:max-w-xl md:max-w-2xl max-h-[90vh] p-0 bg-black border-gray-800 overflow-auto">
+      <DialogContent className="top-[50%] translate-y-[-50%] w-[90vw] max-w-md sm:max-w-xl md:max-w-2xl max-h-[90vh] p-0 bg-black border-gray-800 overflow-auto">
         <VisuallyHidden>
           <DialogTitle>Your Cart</DialogTitle>
           <DialogDescription>Items in your shopping cart</DialogDescription>

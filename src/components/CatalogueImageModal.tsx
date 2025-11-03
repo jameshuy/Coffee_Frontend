@@ -137,7 +137,7 @@ export default function CatalogueImageModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[calc(100%-1rem)] sm:max-w-4xl max-h-[90vh] p-0 bg-black border-gray-800 hide-default-close">
+      <DialogContent className="top-[50%] translate-y-[-50%] w-[calc(100%-1rem)] sm:max-w-4xl max-h-[90vh] p-0 bg-black border-gray-800 hide-default-close">
         <VisuallyHidden>
           <DialogTitle>Poster Details</DialogTitle>
         </VisuallyHidden>

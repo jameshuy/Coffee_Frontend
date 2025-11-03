@@ -13,7 +13,7 @@ export default function WelcomeModal({
 }: WelcomeModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md bg-black border-gray-800">
+      <DialogContent className="top-[50%] translate-y-[-50%] sm:max-w-md bg-black border-gray-800">
         <div className="pt-6">
           <ModalHeader title="Welcome" description="" />
         </div>

@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 function TermsDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 bg-black border-gray-800">
+      <DialogContent className="top-[50%] translate-y-[-50%] sm:max-w-2xl max-h-[90vh] p-0 bg-black border-gray-800">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle className="text-xl text-center text-white">Terms and Conditions</DialogTitle>
         </DialogHeader>
@@ -264,7 +264,7 @@ export default function SellPosterModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="w-[calc(100%-1rem)] sm:max-w-md max-h-[90vh] overflow-y-auto bg-black border-gray-800 hide-default-close">
+        <DialogContent className="top-[50%] translate-y-[-50%] w-[calc(100%-1rem)] sm:max-w-md max-h-[90vh] overflow-y-auto bg-black border-gray-800 hide-default-close">
           <DialogHeader>
             <DialogTitle className="text-xl text-center text-white font-racing-sans">Sell your poster</DialogTitle>
             <DialogDescription className="text-center text-gray-300">

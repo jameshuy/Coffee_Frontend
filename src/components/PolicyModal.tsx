@@ -27,7 +27,7 @@ export default function PolicyModal({ title, children, triggerText }: PolicyModa
           {triggerText}
         </a>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="top-[50%] translate-y-[-50%] max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold mb-4 text-white">{title}</DialogTitle>
         </DialogHeader>

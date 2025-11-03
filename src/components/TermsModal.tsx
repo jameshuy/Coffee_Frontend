@@ -15,7 +15,7 @@ interface TermsModalProps {
 export default function TermsModal({ isOpen, onClose }: TermsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 bg-black border-gray-800">
+      <DialogContent className="top-[50%] translate-y-[-50%] sm:max-w-2xl max-h-[90vh] p-0 bg-black border-gray-800">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle className="text-xl text-center text-white">Terms and Conditions</DialogTitle>
         </DialogHeader>

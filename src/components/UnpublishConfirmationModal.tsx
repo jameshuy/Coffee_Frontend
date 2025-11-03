@@ -19,7 +19,7 @@ export default function UnpublishConfirmationModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="sm:max-w-md bg-black border border-gray-800 text-white"
+        className="top-[50%] translate-y-[-50%] sm:max-w-md bg-black border border-gray-800 text-white"
         style={{ zIndex: 60 }} // Higher z-index than the poster view modal
       >
         <VisuallyHidden>

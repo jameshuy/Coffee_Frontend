@@ -262,7 +262,7 @@ export default function DashboardImageModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className={`sm:max-w-4xl max-h-[90vh] bg-black border-gray-800 p-0 ${
+        <DialogContent className={`top-[50%] translate-y-[-50%] sm:max-w-4xl max-h-[90vh] bg-black border-gray-800 p-0 ${
           orderStep !== "idle" ? "overflow-y-auto" : "overflow-hidden"
         }`}>
           <VisuallyHidden>

@@ -184,6 +184,41 @@ body {
     }
   }
 
+  /* Height-only animations for bottom sheet */
+  @keyframes heightExpand {
+    from {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    to {
+      max-height: 400px;
+      /* Adjust based on your content height */
+      opacity: 1;
+    }
+  }
+
+  @keyframes heightCollapse {
+    from {
+      max-height: 400px;
+      /* Same as expand */
+      opacity: 1;
+    }
+
+    to {
+      max-height: 0;
+      opacity: 0;
+    }
+  }
+
+  .animate-height-expand {
+    animation: heightExpand 0.3s ease-out forwards;
+  }
+
+  .animate-height-collapse {
+    animation: heightCollapse 0.3s ease-in forwards;
+  }
+
 }
 
 

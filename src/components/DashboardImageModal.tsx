@@ -391,7 +391,7 @@ export default function DashboardImageModal({
 
           {/* Shipping & Payment Flow */}
           {orderStep === "shipping" && !orderCompleted && (
-            <div className="w-full mt-8 max-w-md">
+            <div className="w-full mt-8 max-w-md px-2">
               {/* Order Summary */}
               <OrderSummary />
               
@@ -407,7 +407,7 @@ export default function DashboardImageModal({
               />
 
               {/* Separate payment button */}
-              <div className="pt-4">
+              <div className="pt-4 mb-8">
                 <Button
                   onClick={() => {
                     const submitButton = document.getElementById("shipping-form-submit") as HTMLButtonElement;

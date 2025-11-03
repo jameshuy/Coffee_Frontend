@@ -31,41 +31,51 @@ body {
 }
 
 @layer utilities {
+
   /* Hide scrollbar but still allow scrolling */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
+
   .no-scrollbar::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari and Opera */
+    display: none;
+    /* Chrome, Safari and Opera */
   }
-  
+
   /* Show scrollbar on hover for styles palette */
   .styles-scrollable {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
+
   .styles-scrollable::-webkit-scrollbar {
     height: 0px;
   }
-  
+
   .styles-palette-container:hover .styles-scrollable {
     scrollbar-width: auto;
     -ms-overflow-style: auto;
   }
+
   .styles-palette-container:hover .styles-scrollable::-webkit-scrollbar {
     height: 14px;
   }
+
   .styles-palette-container:hover .styles-scrollable::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     margin: 0 20px;
   }
+
   .styles-palette-container:hover .styles-scrollable::-webkit-scrollbar-thumb {
     background: #ffd700;
     border-radius: 8px;
     border: 2px solid rgba(0, 0, 0, 0.1);
   }
+
   .styles-palette-container:hover .styles-scrollable::-webkit-scrollbar-thumb:hover {
     background: #ffed4e;
   }
@@ -75,11 +85,12 @@ body {
     0% {
       transform: translateX(0);
     }
+
     100% {
       transform: translateX(-50%);
     }
   }
-  
+
   .animate-scroll-slow {
     animation: scroll-right-to-left 60s linear infinite;
   }
@@ -88,16 +99,93 @@ body {
     0% {
       transform: translateX(0);
     }
+
     100% {
       transform: translateX(-50%);
     }
   }
-  
+
   .animate-slideLeft {
     animation: slideLeft 15s linear infinite;
   }
-  
+
+  /* Bottom sheet slide animations for mobile */
+  @media (max-width: 639px) {
+
+    /* Override ALL default dialog positioning to make it a bottom sheet */
+    [data-radix-dialog-content][style*="bottom: 0"],
+    [data-radix-dialog-content][style*="bottom: 0px"],
+    [data-radix-dialog-content].bg-black[style*="bottom"] {
+      left: 0 !important;
+      right: 0 !important;
+      top: auto !important;
+      bottom: 0 !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      transform-origin: bottom center !important;
+      /* Remove default centering transforms */
+      translate: none !important;
+    }
+
+    /* Make overlay stop at bottom navigation so users can still click nav icons */
+    [data-radix-dialog-overlay] {
+      bottom: 70px !important;
+      z-index: 60 !important;
+    }
+
+    /* Ensure bottom navigation is always above overlay and clickable */
+    .fixed.bottom-0.z-\[80\] {
+      z-index: 80 !important;
+      pointer-events: auto !important;
+    }
+  }
+
+  @keyframes slideUpFromBottom {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDownToBottom {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translateY(0);
+    }
+
+    to {
+      transform: translateY(100%);
+    }
+  }
+
 }
+
 
 
 /* Hide default close button in poster modal */
@@ -110,9 +198,11 @@ body {
   0% {
     box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
   }
+
   70% {
     box-shadow: 0 0 0 30px rgba(255, 215, 0, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
   }
@@ -126,6 +216,7 @@ body {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -139,6 +230,7 @@ body {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -184,32 +276,32 @@ body {
   .font-roboto {
     font-family: 'Roboto', sans-serif;
   }
-  
+
   .font-playfair {
     font-family: 'Playfair Display', serif;
   }
-  
+
   .font-baskerville {
     font-family: 'Libre Baskerville', serif;
   }
-  
+
   .font-notosans {
     font-family: 'Noto Sans', sans-serif;
     font-weight: 300;
   }
-  
+
   .font-oi {
     font-family: 'Oi', serif;
     font-weight: 400;
     font-style: normal;
   }
-  
+
   .font-ibm-plex-sans {
     font-family: 'IBM Plex Sans', sans-serif;
     font-weight: 300;
     font-style: normal;
   }
-  
+
   .font-racing-sans {
     font-family: 'Racing Sans One', cursive;
     font-weight: 400;

@@ -780,7 +780,7 @@ export default function Create() {
                               >
                                 <div className="absolute inset-0 transition-opacity duration-500">
                                   <div
-                                    className="relative w-full h-full overflow-hidden rounded-lg"
+                                    className={`relative w-full h-full overflow-hidden rounded-lg ${!isMobile ? 'mt-12' : ''}`}
                                     style={{ border: isPosterGenerated ? '30px solid white' : 'none' }}
                                   >
                                     {showVideoTransition && videoObjectUrl && formData.uploadedVideo ? (

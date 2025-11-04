@@ -34,6 +34,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 import TextOverlayTool from "@/components/TextOverlayTool";
 import { constructPrompt } from "@/lib/utils";
 import { videoFileStorage } from "@/components/ImageSourceModal";
+import ImageUploader from "@/components/ImageUploader";
 
 type Step = "upload" | "customize" | "shipping";
 
@@ -758,7 +759,11 @@ export default function Create() {
                         // Show ImageUploader only when not showing styles
                         !showStyles ? (
                           !formData.uploadedImage ? (
-                            <></>
+                            <ImageUploader
+                              onImageUpload={handleFileUpload}
+                              onVideoUpload={handleVideoUpload}
+                              uploadedImage={formData.uploadedImage}
+                            />
                           ) : (
                             <div className="ImagePreview w-full mx-auto flex justify-center items-center" style={{ maxWidth: isPosterGenerated ? 'none' : '350px' }}>
                               <div
@@ -890,7 +895,7 @@ export default function Create() {
                           step === "upload" &&
                           !isPosterGenerated &&
                           !isGeneratingPoster && (
-                            <div className="w-full -mt-1">
+                            <div className={`w-full ${isMobile ? '-mt-1' : 'mt-32 pt-12'}`}>
                               {/* Subheading for style selection - only show when styles are visible */}
                               {showStyles && (
                                 <h3 className="text-white text-xl font-racing-sans text-center mb-4">

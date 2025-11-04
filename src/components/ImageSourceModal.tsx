@@ -277,7 +277,7 @@ export default function ImageSourceModal({ isOpen, onClose }: ImageSourceModalPr
                 <input
                     ref={cameraInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/*"
                     // capture attribute is respected on many mobile browsers
                     capture={isMobile ? "environment" : undefined}
                     onChange={handleChange}

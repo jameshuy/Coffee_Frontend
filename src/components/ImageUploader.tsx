@@ -301,21 +301,63 @@ export default function ImageUploader({
     const listener = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.type === 'image' && data.uri) {
-          console.log('📸 Received image from native camera:', data.uri);
+        const { type, subtype, uri } = data || {};
 
-          // Convert base64 to a File-like object for uniform handling
-          const byteString = atob(data.uri.split(',')[1]);
+        // Support legacy payloads { type: 'image', uri: dataUrl }
+        const isLegacyImage = type === 'image' && typeof uri === 'string' && uri.startsWith('data:');
+
+        // Support new payloads from Expo: { type: 'media', subtype: 'image/jpeg' | 'video/mp4', uri: dataUrl }
+        const isMedia = type === 'media' && typeof uri === 'string';
+        const isImageMedia = isMedia && typeof subtype === 'string' && subtype.startsWith('image/');
+        const isVideoMedia = isMedia && typeof subtype === 'string' && subtype.startsWith('video/');
+
+        if (isLegacyImage || isImageMedia) {
+          const dataUrl = uri as string;
+          if (!dataUrl.startsWith('data:')) {
+            console.warn('Ignoring non-data URL image payload');
+            return;
+          }
+          console.log('📸 Received image from native app');
+          const mime = (subtype && typeof subtype === 'string' && subtype.startsWith('image/')) ? subtype : 'image/jpeg';
+
+          const base64 = dataUrl.split(',')[1];
+          const byteString = atob(base64);
           const ab = new ArrayBuffer(byteString.length);
           const ia = new Uint8Array(ab);
-          for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-          }
-          const blob = new Blob([ab], { type: 'image/jpeg' });
-          const file = new File([blob], 'camera_capture.jpg', { type: 'image/jpeg' });
-
-          // Pass it to the same onDrop pipeline
+          for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+          const blob = new Blob([ab], { type: mime });
+          const file = new File([blob], `camera_capture.${mime.split('/')[1] || 'jpg'}`, { type: mime });
           onDrop([file], []);
+          return;
+        }
+
+        if (isVideoMedia) {
+          const dataUrl = uri as string;
+          // If native sent a local file path (file:/// or content://), we can't read it from the WebView sandbox.
+          // Ask native to resend as base64 data URL or show a friendly message.
+          if (!dataUrl.startsWith('data:')) {
+            console.warn('Received file-path video payload; needs base64 data URL');
+            toast({
+              title: 'Video needs conversion',
+              description: 'Please resend the video as a base64 data URL from the app.',
+              variant: 'destructive',
+            });
+            try {
+              window.ReactNativeWebView?.postMessage('requestVideoBase64');
+            } catch {}
+            return;
+          }
+          console.log('🎥 Received video from native app');
+          const mime = subtype as string;
+          const base64 = dataUrl.split(',')[1];
+          const byteString = atob(base64);
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+          const blob = new Blob([ab], { type: mime });
+          const file = new File([blob], `camera_capture.${mime.split('/')[1] || 'mp4'}`, { type: mime });
+          if (onVideoUpload) onVideoUpload(file);
+          return;
         }
       } catch (err) {
         console.warn("Failed to parse native message", err);

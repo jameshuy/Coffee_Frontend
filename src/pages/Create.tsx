@@ -638,8 +638,8 @@ export default function Create() {
   useEffect(() => {
     const calculateHeight = () => {
       if (isPosterGenerated) {
-        const maxViewportHeight = window.innerHeight * 0.8;
-        const maxWidth = isMobile ? window.innerWidth * 0.95 : window.innerWidth * 0.65;
+        const maxViewportHeight = window.innerHeight * 0.55;
+        const maxWidth = isMobile ? window.innerWidth * 0.8 : window.innerWidth * 0.65;
         const heightBasedOnWidth = maxWidth / 0.707;
         const optimalHeight = Math.min(maxViewportHeight, heightBasedOnWidth);
         setContainerHeight(optimalHeight);
@@ -765,7 +765,7 @@ export default function Create() {
                               uploadedImage={formData.uploadedImage}
                             />
                           ) : (
-                            <div className="ImagePreview w-full mx-auto flex justify-center items-center" style={{ maxWidth: isPosterGenerated ? 'none' : '350px' }}>
+                            <div className={`ImagePreview w-full mx-auto flex justify-center items-center  ${!isMobile ? 'mt-40' : ''}`} style={{ maxWidth: isPosterGenerated ? 'none' : '350px' }}>
                               <div
                                 ref={containerRef}
                                 className="relative mx-auto"
@@ -774,13 +774,13 @@ export default function Create() {
                                   width: containerHeight ? containerHeight * 0.707 : 389,
                                   maxWidth: '95vw',
                                   transition: 'all 0.5s ease-in-out, box-shadow 1.2s ease-in-out',
-                                  transform: isPosterGenerated && generatedImageLoaded ? 'scale(1.1)' : 'scale(1)',
+                                  transform: 'scale(1)',
                                   boxShadow: isPosterGenerated && generatedImageLoaded ? '0 0 30px rgba(255,215,0,0.7)' : 'none'
                                 }}
                               >
                                 <div className="absolute inset-0 transition-opacity duration-500">
                                   <div
-                                    className={`relative w-full h-full overflow-hidden rounded-lg ${!isMobile ? 'mt-12' : ''}`}
+                                    className={`relative w-full h-full overflow-hidden rounded-lg`}
                                     style={{ border: isPosterGenerated ? '30px solid white' : 'none' }}
                                   >
                                     {showVideoTransition && videoObjectUrl && formData.uploadedVideo ? (

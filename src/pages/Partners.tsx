@@ -65,9 +65,7 @@ export default function Partners() {
       {/* Dark overlay for text readability - lighter on mobile */}
       <div className="absolute inset-0 bg-black z-[2]"></div>
 
-      <div className="relative z-20">
-        <Navigation />
-      </div>
+      <Navigation />
       <main className={`relative z-20 flex-grow flex flex-col mt-32 ${isMobile ? 'pb-20' : ''}`}>
         {/* Top content */}
         <div className="container mx-auto px-4 pt-2 md:pt-6 text-center">

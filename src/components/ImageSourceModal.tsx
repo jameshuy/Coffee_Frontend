@@ -226,17 +226,17 @@ export default function ImageSourceModal({ isOpen, onClose }: ImageSourceModalPr
             >
                 <div className="py-2">
                     <div className="mx-auto h-1.5 w-12 rounded-full bg-zinc-700 my-3" />
-                    <div className="px-4">
-                        <DialogTitle className="text-center text-base font-medium">Select image or video</DialogTitle>
+                    <div className="h-0">
+                        <DialogTitle className="text-center text-base font-medium"></DialogTitle>
                     </div>
-                    <div className="px-4 pb-2">
-                        <h3 className="text-center text-sm text-zinc-400">Create from</h3>
+                    <div className="h-0">
+                        <h3 className="text-center text-sm text-zinc-400"></h3>
                     </div>
 
                     <div className="flex flex-col">
                         <button
                             onClick={() => handlePick("camera")}
-                            className="flex items-center gap-3 px-5 py-4 active:bg-zinc-800"
+                            className="flex items-center gap-3 px-5 py-2 active:bg-zinc-800"
                         >
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800">
                                 <Camera size={20} />
@@ -251,7 +251,7 @@ export default function ImageSourceModal({ isOpen, onClose }: ImageSourceModalPr
 
                         <button
                             onClick={() => handlePick("library")}
-                            className="flex items-center gap-3 px-5 py-4 active:bg-zinc-800"
+                            className="flex items-center gap-3 px-5 py-2 active:bg-zinc-800"
                         >
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800">
                                 <ImageIcon size={20} />
@@ -266,7 +266,7 @@ export default function ImageSourceModal({ isOpen, onClose }: ImageSourceModalPr
                     <div className="mt-2 px-4 pb-4">
                         <button
                             onClick={onClose}
-                            className="w-full rounded-xl bg-zinc-800 py-3 text-center text-sm"
+                            className="w-full rounded-xl bg-zinc-800 py-2 text-center text-sm"
                         >
                             Cancel
                         </button>

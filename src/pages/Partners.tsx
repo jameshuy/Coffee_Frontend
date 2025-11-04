@@ -7,14 +7,17 @@ import { LoginModal } from "@/components/LoginModal";
 import { SignUpModal } from "@/components/SignUpModal";
 import { PartnerModal } from "@/components/PartnerModal";
 import { PARTNER_CAFES } from "@/data/partner-cafes";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import cafeHeroImage from "@assets/ChatGPT Image Aug 9, 2025, 01_32_58 PM_1754739185605.jpg";
+import BottomNavigation from "@/components/BottomNavigation";
 
 export default function Partners() {
   const [, setLocation] = useLocation();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -63,9 +66,9 @@ export default function Partners() {
       <div className="absolute inset-0 bg-black z-[2]"></div>
 
       <div className="relative z-20">
-        <Navigation transparent />
+        <Navigation />
       </div>
-      <main className="relative z-20 flex-grow flex flex-col">
+      <main className={`relative z-20 flex-grow flex flex-col mt-32 ${isMobile ? 'pb-20' : ''}`}>
         {/* Top content */}
         <div className="container mx-auto px-4 pt-2 md:pt-6 text-center">
           <p className="text-base md:text-xl text-white font-bold mb-4 md:mb-6 drop-shadow-md px-2">
@@ -222,7 +225,7 @@ export default function Partners() {
         </div>
       </main>
       <div className="relative z-20">
-        <Footer transparent />
+        {!isMobile ? <Footer /> : <BottomNavigation />}
       </div>
 
       {/* Authentication Modals */}

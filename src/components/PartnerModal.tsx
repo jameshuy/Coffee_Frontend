@@ -54,7 +54,7 @@ export function PartnerModal({ open, onOpenChange }: PartnerModalProps) {
           description: "We'll get back to you within 24 hours to discuss the partnership opportunity.",
           variant: "default",
         });
-        
+
         // Reset form and close modal
         setName("");
         setCafeName("");
@@ -83,9 +83,9 @@ export function PartnerModal({ open, onOpenChange }: PartnerModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="top-[50%] translate-y-[-50%] sm:max-w-[425px] bg-black border-[#f1b917] text-white">
+      <DialogContent className="w-[94vw] top-[50%] translate-y-[-50%] sm:max-w-[425px] bg-black border-gray-800 text-white">
         <DialogHeader>
-          <DialogTitle className="text-center font-racing text-2xl text-white" style={{ fontFamily: "'Racing Sans One', cursive" }}>
+          <DialogTitle className="text-center font-racing text-2xl text-white pt-4" style={{ fontFamily: "'Racing Sans One', cursive" }}>
             Partner with us and boost your margins
           </DialogTitle>
           <DialogDescription className="text-center text-white">

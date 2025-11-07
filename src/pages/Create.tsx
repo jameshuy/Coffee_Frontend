@@ -35,6 +35,7 @@ import TextOverlayTool from "@/components/TextOverlayTool";
 import { constructPrompt } from "@/lib/utils";
 import { videoFileStorage } from "@/components/ImageSourceModal";
 import ImageUploader from "@/components/ImageUploader";
+import { UnlockModal } from "@/components/UnlockModal";
 
 type Step = "upload" | "customize" | "shipping";
 
@@ -541,6 +542,7 @@ export default function Create() {
   // State for Share Modal
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isPosterUnlocked, setIsPosterUnlocked] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
 
 
   // Function to handle Share button click
@@ -733,6 +735,20 @@ export default function Create() {
     resetOrderState();
     setSelectedStyle(STYLES[0]);
     setShowTextTool(false);
+  };
+
+  // Function to handle Unlock button click
+  const handleUnlockClick = () => {
+    if (!currentPosterId) {
+      toast({
+        title: "Error",
+        description: "Invalid poster ID",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsUnlockModalOpen(true);
+    trackEvent("Unlock", "unlock_button_clicked");
   };
 
 
@@ -1093,6 +1109,7 @@ export default function Create() {
                   {!isPosterUnlocked && (
                     <Button
                       className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-gray-100 transition-colors duration-200 text-xs sm:text-sm"
+                      onClick={handleUnlockClick}
                     >
                       Unlock&Own
                     </Button>
@@ -1505,6 +1522,15 @@ export default function Create() {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         imageUrl={formData.uploadedImage}
+      />
+
+      {/* Unlock Modal */}
+      <UnlockModal
+        open={isUnlockModalOpen}
+        onOpenChange={setIsUnlockModalOpen}
+        posterId={currentPosterId}
+        posterUrl={generatedPosterUrl || ''}
+        onUnlockSuccess={() => { }}
       />
 
       {/* Sell Poster Modal */}

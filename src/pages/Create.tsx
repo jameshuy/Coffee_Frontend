@@ -24,7 +24,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import Confetti from "react-confetti";
 import { trackEvent, trackPosterGeneration, trackTiming, trackError } from "@/lib/analytics";
-import { RotateCcw, Tag, Share2, ArrowLeft } from "lucide-react";
+import { RotateCcw, Tag, Share2, ArrowLeft, Download } from "lucide-react";
 import { preventImageDownload } from "@/lib/image-protection";
 import { useCreateFlow } from "@/hooks/useCreateFlow";
 import { useOrderFlow } from "@/hooks/useOrderFlow";
@@ -269,6 +269,24 @@ export default function Create() {
         const displayUrl = data.previewUrl || data.posterUrl;
         const fullUrl = import.meta.env.VITE_API_URL + displayUrl;
         setFormData({ uploadedImage: fullUrl });
+        const posterId = displayUrl.split('/').pop()?.split('?')[0] || displayUrl;
+        setCurrentPosterId(posterId)
+
+        if (isAuthenticated && userEmail) {
+          try {
+            const unlockResponse = await apiRequest("GET", `/api/check-poster-unlock/${posterId}`);
+            const unlockData = await unlockResponse.json();
+            setIsPosterUnlocked(unlockData.unlocked);
+          } catch (error) {
+            console.error("Failed to check unlock status:", error);
+            // Default to not unlocked if check fails
+            setIsPosterUnlocked(false);
+          }
+        } else {
+          // For unauthenticated users, poster is not unlocked
+          setIsPosterUnlocked(false);
+        }
+
         setIsPosterGenerated(true);
         const img = new Image();
         img.onload = () => {
@@ -346,7 +364,7 @@ export default function Create() {
   // Authentication modal states
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
-
+  const [currentPosterId, setCurrentPosterId] = useState<string>("");
   // State for account creation modal
   const [isAccountCreationModalOpen, setIsAccountCreationModalOpen] =
     useState<boolean>(false);
@@ -522,6 +540,8 @@ export default function Create() {
 
   // State for Share Modal
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isPosterUnlocked, setIsPosterUnlocked] = useState(false);
+
 
   // Function to handle Share button click
   const handleShareClick = () => {
@@ -1070,25 +1090,47 @@ export default function Create() {
                   </Button>
                   {/* Add Text button disabled as requested */}
 
-                  {/* Share button with Web Share API */}
-                  {isAuthenticated && (
+                  {!isPosterUnlocked && (
                     <Button
-                      className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center"
-                      onClick={handleShareClick}
+                      className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-gray-100 transition-colors duration-200 text-xs sm:text-sm"
                     >
-                      <Share2 size={16} className="mr-1" /> Share
+                      Unlock&Own
                     </Button>
                   )}
 
-                  {/* Sell button - visible to all authenticated users */}
-                  {isAuthenticated && (
-                    <Button
-                      className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center"
-                      onClick={handleSellClick}
-                    >
-                      <Tag size={16} className="mr-1" /> Sell
-                    </Button>
+                  {/* Share button with Web Share API */}
+                  {isPosterUnlocked && (
+                    <>
+                      {/* Share button with Web Share API */}
+                      {isAuthenticated && (
+                        <Button
+                          className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center"
+                          onClick={handleShareClick}
+                        >
+                          <Share2 size={16} className="mr-1" /> Share
+                        </Button>
+                      )}
+
+                      {/* Sell button - visible to all authenticated users */}
+                      {isAuthenticated && (
+                        <Button
+                          className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center"
+                          onClick={handleSellClick}
+                        >
+                          <Tag size={16} className="mr-1" /> Sell
+                        </Button>
+                      )}
+
+                      {/* Download button */}
+                      <Button
+                        className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center"
+                        aria-label="Download"
+                      >
+                        <Download size={16} />
+                      </Button>
+                    </>
                   )}
+
                   <Button
                     className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center"
                     onClick={() => { window.history.back(); }}

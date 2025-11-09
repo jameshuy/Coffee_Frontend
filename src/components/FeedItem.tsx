@@ -488,7 +488,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
                           opacity: isHovered ? 1 : 0,
                         }}
                       >
-                        <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg">
+                        <div className="rounded-lg px-4 py-3 shadow-lg">
                           <div className="text-white">
                             {post.username && (
                               <p className="font-racing-sans text-lg leading-tight">@{post.username}</p>
@@ -569,7 +569,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
                           opacity: isHovered ? 1 : 0,
                         }}
                       >
-                        <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg">
+                        <div className="rounded-lg px-4 py-3 shadow-lg">
                           <div className="text-white">
                             {post.username && (
                               <p className="font-racing-sans text-lg leading-tight">@{post.username}</p>
@@ -657,7 +657,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
                         opacity: isHovered ? 1 : 0,
                       }}
                     >
-                      <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg">
+                      <div className="rounded-lg px-4 py-3 shadow-lg">
                         <div className="text-white">
                           {post.username && (
                             <p className="font-racing-sans text-lg leading-tight">@{post.username}</p>

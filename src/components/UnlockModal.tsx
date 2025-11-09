@@ -200,7 +200,7 @@ export function UnlockModal({ open, onOpenChange, posterId, posterUrl, onUnlockS
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[450px] bg-black border-[#f1b917] text-white">
+            <DialogContent className="top-[50%] translate-y-[-50%] sm:max-w-[450px] bg-black border-[#f1b917] text-white">
                 <DialogHeader>
                     <DialogTitle className="text-center font-racing text-2xl text-[#f1b917] mb-1" style={{ fontFamily: "'Racing Sans One', cursive" }}>
                         Unlock Your Poster's Potential

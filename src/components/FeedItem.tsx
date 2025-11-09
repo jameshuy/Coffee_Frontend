@@ -423,15 +423,6 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
             )}
           </button>
           
-          {/* Share button */}
-          <button
-            onClick={handleShare}
-            className="bg-gray-800/80 p-2 rounded-full hover:bg-gray-700 transition-colors"
-            aria-label="Share"
-          >
-            <Share size={20} className="text-gray-300" />
-          </button>
-          
           {/* Catalogue button */}
           <button
             onClick={handleCatalogue}

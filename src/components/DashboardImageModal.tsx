@@ -370,15 +370,6 @@ export default function DashboardImageModal({
               )}
             </Button>
             
-            {/* Share button */}
-            <button
-              onClick={() => onShare && onShare(imageUrl)}
-              className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-2 flex items-center justify-center transition-colors"
-              aria-label="Share"
-            >
-              <Share size={20} />
-            </button>
-            
             {/* Custom close button */}
             <button
               onClick={onClose}

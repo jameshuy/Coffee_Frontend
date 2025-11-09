@@ -225,7 +225,9 @@ export function UnlockModal({ open, onOpenChange, posterId, posterUrl, onUnlockS
                                 <div className="absolute -top-0 left-0 bg-gradient-to-r from-[#f1b917] to-[#ffd700] text-black text-[9px] font-bold px-1.5 py-0.5 rounded">
                                     💰 10X VALUE
                                 </div>
-                                <Tag className="mr-2 h-4 w-4 text-[#f1b917] mt-0.5 flex-shrink-0" />
+                            </li>
+                            <li className="flex items-start relative">
+                                <Tag className="mr-2 h-4 w-4 text-[#f1b917] mt-1 flex-shrink-0" />
                                 <div>
                                     <p className="text-white font-semibold text-sm">Turn €3 into €30+</p>
                                     <p className="text-gray-400 text-xs">Set your price • Get featured • Earn from every collector purchase</p>

@@ -93,16 +93,74 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
   const [showShareModal, setShowShareModal] = useState(false);
   const [showCatalogueModal, setShowCatalogueModal] = useState(false);
   const [imageBounds, setImageBounds] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [calculatedContainerHeight, setCalculatedContainerHeight] = useState<number | null>(null);
+  const [calculatedImageSize, setCalculatedImageSize] = useState<{ width: number; height: number } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
   const hasPausedForPoster = useRef(false);
   const isPosterShowing = useRef(false);
   const posterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  // Calculate container height based on image aspect ratio to maintain 18px border on all sides
+  const calculateContainerHeight = useCallback(() => {
+    const imageContainer = imageContainerRef.current;
+    if (!imageContainer) return;
+
+    const containerRect = imageContainer.getBoundingClientRect();
+    let availableWidth = containerRect.width;
+
+    // Fallback: try to get width from parent if imageContainer width is 0
+    if (availableWidth === 0 && imageContainer.parentElement) {
+      availableWidth = imageContainer.parentElement.getBoundingClientRect().width;
+    }
+
+    if (availableWidth === 0) return;
+
+    // Get the media element (video or image)
+    const videoElement = videoRef.current;
+    const imageElement = imageRef.current;
+
+    let naturalWidth = 0;
+    let naturalHeight = 0;
+
+    if (videoElement) {
+      naturalWidth = videoElement.videoWidth || 0;
+      naturalHeight = videoElement.videoHeight || 0;
+    } else if (imageElement) {
+      naturalWidth = imageElement.naturalWidth || 0;
+      naturalHeight = imageElement.naturalHeight || 0;
+    }
+
+    if (naturalWidth === 0 || naturalHeight === 0) return;
+
+    // Calculate aspect ratio
+    const mediaAspect = naturalWidth / naturalHeight;
+
+    // With 18px padding on each side (36px total), calculate image width
+    const imageWidth = availableWidth - 36; // 18px left + 18px right
+    if (imageWidth <= 0) return;
+
+    const imageHeight = imageWidth / mediaAspect;
+
+    // Store calculated image size
+    setCalculatedImageSize({ width: imageWidth, height: imageHeight });
+
+    // Container height = image height + 36px (18px top + 18px bottom)
+    const calculatedHeight = imageHeight + 36;
+
+    // Don't exceed available height from parent
+    const maxHeight = containerHeight || window.innerHeight;
+    const finalHeight = Math.min(calculatedHeight, maxHeight);
+
+    setCalculatedContainerHeight(finalHeight);
+  }, [containerHeight]);
 
   // Calculate actual image/video bounds when using object-contain
   const calculateImageBounds = useCallback(() => {
@@ -306,184 +364,297 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
 
   return (
     <div className="flex flex-col items-center w-full h-full relative py-2">
-      {/* Poster name above thumbnail */}
-      {post.name && (
-        <h2 className="text-white text-lg font-semibold mb-2 text-center flex-shrink-0">
-          {post.name}
-        </h2>
-      )}
 
-      {/* Video transition or static poster */}
+      {/* Video transition or static poster - fill remaining space */}
       <div className="w-full relative flex-1 min-h-0 flex items-center justify-center">
         <div
-          ref={containerRef}
-          className="w-full h-full max-w-full max-h-full bg-white p-[18px] flex items-center justify-center relative"
+          ref={imageContainerRef}
+          className="w-full max-w-full flex items-center justify-center relative"
+          style={{ maxHeight: '100%' }}
         >
-          {showVideoTransition && videoObjectUrl && post.videoFrameTimestamp !== undefined ? (
-            <div className="relative w-full h-full">
-              {/* Base video that loops */}
-              <div className="relative w-full h-full">
-                <video
-                  ref={videoRef}
-                  src={videoObjectUrl}
-                  className="w-full h-full object-contain transition-opacity duration-500"
-                  autoPlay={isVisible}
-                  muted
-                  playsInline
-                  onLoadedData={() => {
-                    setIsLoading(false);
-                    // Check if frame timestamp is beyond video duration
-                    if (videoRef.current && typeof post.videoFrameTimestamp === 'number') {
-                      const videoDuration = videoRef.current.duration;
-                      const targetTime = post.videoFrameTimestamp;
-                      if (targetTime >= videoDuration) {
-                        console.log(`⚠️ Frame timestamp (${targetTime}s) is beyond video duration (${videoDuration}s)`);
+          <div
+            ref={containerRef}
+            className="w-full max-w-full bg-white p-[18px] flex items-center justify-center relative"
+            style={{
+              height: calculatedContainerHeight ? `${calculatedContainerHeight}px` : 'auto',
+              maxHeight: '100%'
+            }}
+          >
+            {showVideoTransition && videoObjectUrl && post.videoFrameTimestamp !== undefined ? (
+              <div className="relative w-full h-full flex items-center justify-center">
+                {/* Video container - overlay positioned relative to video element */}
+                <div
+                  className="relative flex items-center justify-center"
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  onTouchStart={() => setIsHovered(true)}
+                  onTouchEnd={() => setTimeout(() => setIsHovered(false), 2000)}
+                >
+                  <video
+                    ref={videoRef}
+                    src={videoObjectUrl}
+                    className="transition-opacity duration-500"
+                    style={{
+                      width: calculatedImageSize ? `${calculatedImageSize.width}px` : '100%',
+                      height: calculatedImageSize ? `${calculatedImageSize.height}px` : 'auto',
+                      objectFit: 'contain'
+                    }}
+                    autoPlay={isVisible}
+                    muted
+                    playsInline
+                    onLoadedData={() => {
+                      setIsLoading(false);
+                      // Check if frame timestamp is beyond video duration
+                      if (videoRef.current && typeof post.videoFrameTimestamp === 'number') {
+                        const videoDuration = videoRef.current.duration;
+                        const targetTime = post.videoFrameTimestamp;
+                        if (targetTime >= videoDuration) {
+                          console.log(`⚠️ Frame timestamp (${targetTime}s) is beyond video duration (${videoDuration}s)`);
+                        }
                       }
-                    }
-                  }}
-                  onError={() => setIsLoading(false)}
-                  onTimeUpdate={() => {
-                    if (!videoRef.current || typeof post.videoFrameTimestamp !== 'number') return;
+                    }}
+                    onError={() => setIsLoading(false)}
+                    onTimeUpdate={() => {
+                      if (!videoRef.current || typeof post.videoFrameTimestamp !== 'number') return;
 
-                    // Don't process if poster is currently showing
-                    if (isPosterShowing.current) return;
+                      // Don't process if poster is currently showing
+                      if (isPosterShowing.current) return;
 
-                    const currentTime = videoRef.current.currentTime;
-                    const targetTime = post.videoFrameTimestamp;
-                    const posterDisplayDuration = 3;
+                      const currentTime = videoRef.current.currentTime;
+                      const targetTime = post.videoFrameTimestamp;
+                      const posterDisplayDuration = 3;
 
-                    const posterOverlay = document.getElementById(`poster-overlay-${post.id}`);
-                    if (!posterOverlay) {
-                      console.log(`❌ Poster overlay not found for ${post.id}`);
-                      return;
-                    }
-
-                    // Check if we've reached the target timestamp and haven't already paused
-                    if (currentTime >= targetTime && !hasPausedForPoster.current && !videoRef.current.paused) {
-                      console.log(`🎬 Poster fade-in at ${targetTime}s for 3 seconds`);
-                      showPosterForFullDuration(
-                        videoRef.current,
-                        posterOverlay,
-                        isPosterShowing,
-                        hasPausedForPoster,
-                        posterTimeoutRef,
-                        () => console.log(`🎬 Poster cycle complete`)
-                      );
-                    }
-
-                    // Also check if we're near the end and should prepare for poster display
-                    if (videoRef.current.duration &&
-                      currentTime >= videoRef.current.duration - 0.5 &&
-                      targetTime >= videoRef.current.duration - 0.5 &&
-                      !hasPausedForPoster.current) {
-                      // Frame is selected at or near video end - prepare to show poster when video ends
-                      console.log(`🎬 Frame near end detected - will show poster on video end`);
-                    }
-                  }}
-                  onEnded={() => {
-                    // When video ends naturally, check if we've shown the poster
-                    if (videoRef.current && !hasPausedForPoster.current && typeof post.videoFrameTimestamp === 'number') {
-                      // If we haven't shown the poster yet (frame is at/after video end), show it now
                       const posterOverlay = document.getElementById(`poster-overlay-${post.id}`);
-                      if (posterOverlay) {
-                        console.log(`🎬 Video ended - showing poster for full duration`);
+                      if (!posterOverlay) {
+                        console.log(`❌ Poster overlay not found for ${post.id}`);
+                        return;
+                      }
+
+                      // Check if we've reached the target timestamp and haven't already paused
+                      if (currentTime >= targetTime && !hasPausedForPoster.current && !videoRef.current.paused) {
+                        console.log(`🎬 Poster fade-in at ${targetTime}s for 3 seconds`);
                         showPosterForFullDuration(
                           videoRef.current,
                           posterOverlay,
                           isPosterShowing,
                           hasPausedForPoster,
                           posterTimeoutRef,
-                          () => console.log(`🎬 Poster cycle complete after video end`)
+                          () => console.log(`🎬 Poster cycle complete`)
                         );
                       }
-                    } else if (videoRef.current) {
-                      // Normal restart without poster
-                      hasPausedForPoster.current = false;
-                      videoRef.current.currentTime = 0;
-                      videoRef.current.play().catch(console.error);
-                    }
-                  }}
-                />
-                {imageBounds && (
-                  <>
-                    <div
-                      className="absolute z-10"
-                      style={{
-                        left: `${imageBounds.left + 16}px`,
-                        bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
-                      }}
-                    >
-                      <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg">
-                        <div className="text-white">
-                          {post.username && (
-                            <p className="font-racing-sans text-lg leading-tight">@{post.username}</p>
-                          )}
-                          {post.name && (
-                            <p className="text-sm text-gray-200 mt-1 leading-tight">{post.name}</p>
-                          )}
-                          {post.totalSupply !== undefined && (
-                            <p className="text-xs text-gray-300 mt-2 leading-tight">
-                              #{(post.soldCount || 0) + 1}/{post.totalSupply}
-                            </p>
-                          )}
+
+                      // Also check if we're near the end and should prepare for poster display
+                      if (videoRef.current.duration &&
+                        currentTime >= videoRef.current.duration - 0.5 &&
+                        targetTime >= videoRef.current.duration - 0.5 &&
+                        !hasPausedForPoster.current) {
+                        // Frame is selected at or near video end - prepare to show poster when video ends
+                        console.log(`🎬 Frame near end detected - will show poster on video end`);
+                      }
+                    }}
+                    onEnded={() => {
+                      // When video ends naturally, check if we've shown the poster
+                      if (videoRef.current && !hasPausedForPoster.current && typeof post.videoFrameTimestamp === 'number') {
+                        // If we haven't shown the poster yet (frame is at/after video end), show it now
+                        const posterOverlay = document.getElementById(`poster-overlay-${post.id}`);
+                        if (posterOverlay) {
+                          console.log(`🎬 Video ended - showing poster for full duration`);
+                          showPosterForFullDuration(
+                            videoRef.current,
+                            posterOverlay,
+                            isPosterShowing,
+                            hasPausedForPoster,
+                            posterTimeoutRef,
+                            () => console.log(`🎬 Poster cycle complete after video end`)
+                          );
+                        }
+                      } else if (videoRef.current) {
+                        // Normal restart without poster
+                        hasPausedForPoster.current = false;
+                        videoRef.current.currentTime = 0;
+                        videoRef.current.play().catch(console.error);
+                      }
+                    }}
+                  />
+
+                  {/* Poster data - bottom left overlay on video - positioned on actual image */}
+                  {imageBounds && isHovered && (
+                    <>
+                      <div
+                        className="absolute z-10 transition-opacity duration-300"
+                        style={{
+                          left: `${imageBounds.left + 16}px`,
+                          bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
+                          opacity: isHovered ? 1 : 0,
+                        }}
+                      >
+                        <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg">
+                          <div className="text-white">
+                            {post.username && (
+                              <p className="font-racing-sans text-lg leading-tight">@{post.username}</p>
+                            )}
+                            {post.name && (
+                              <p className="text-sm text-gray-200 mt-1 leading-tight">{post.name}</p>
+                            )}
+                            {post.totalSupply !== undefined && (
+                              <p className="text-xs text-gray-300 mt-2 leading-tight">
+                                #{(post.soldCount || 0) + 1}/{post.totalSupply}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Like and ShoppingCart buttons - bottom right overlay on video */}
-                    <div
-                      className="absolute flex flex-row gap-2 z-10"
-                      style={{
-                        right: `${(containerRef.current?.getBoundingClientRect().width || 0) - imageBounds.left - imageBounds.width + 16}px`,
-                        bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
-                      }}
-                    >
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleLike();
+                      {/* Like and ShoppingCart buttons - bottom right overlay on video */}
+                      <div
+                        className="absolute flex flex-row gap-2 z-10 transition-opacity duration-300"
+                        style={{
+                          right: `${(containerRef.current?.getBoundingClientRect().width || 0) - imageBounds.left - imageBounds.width + 16}px`,
+                          bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
+                          opacity: isHovered ? 1 : 0,
                         }}
-                        className="bg-gray-800/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-700 transition-colors relative shadow-lg"
-                        aria-label={hasLiked ? "Unlike" : "Like"}
                       >
-                        <Heart
-                          size={20}
-                          className={hasLiked ? "text-red-500 fill-red-500" : "text-gray-300"}
-                        />
-                      </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLike();
+                          }}
+                          className="bg-gray-800/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-700 transition-colors relative shadow-lg"
+                          aria-label={hasLiked ? "Unlike" : "Like"}
+                        >
+                          <Heart
+                            size={20}
+                            className={hasLiked ? "text-red-500 fill-red-500" : "text-gray-300"}
+                          />
+                        </button>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCatalogue();
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCatalogue();
+                          }}
+                          className="bg-gray-800/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-700 transition-colors shadow-lg"
+                          aria-label="View in catalogue"
+                        >
+                          <ShoppingCart size={20} className="text-gray-300" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Poster overlay that appears at selected frame - use thumbnail for faster loading */}
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                  <img
+                    id={`poster-overlay-${post.id}`}
+                    src={`${import.meta.env.VITE_API_URL}/api/storage-image/${post.thumbnailPath || post.generatedPath}`}
+                    className="transition-opacity duration-500 opacity-0 pointer-events-none"
+                    style={{
+                      width: calculatedImageSize ? `${calculatedImageSize.width}px` : '100%',
+                      height: calculatedImageSize ? `${calculatedImageSize.height}px` : 'auto',
+                      objectFit: 'contain'
+                    }}
+                    alt="Generated poster at selected frame"
+                    onLoad={() => setIsLoading(false)}
+                    onError={() => setIsLoading(false)}
+                  />
+                  {/* Poster data - bottom left overlay on poster image - positioned on actual image */}
+                  {imageBounds && isHovered && (
+                    <>
+                      <div
+                        className="absolute z-10 pointer-events-auto transition-opacity duration-300"
+                        style={{
+                          left: `${imageBounds.left + 16}px`,
+                          bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
+                          opacity: isHovered ? 1 : 0,
                         }}
-                        className="bg-gray-800/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-700 transition-colors shadow-lg"
-                        aria-label="View in catalogue"
                       >
-                        <ShoppingCart size={20} className="text-gray-300" />
-                      </button>
-                    </div>
-                  </>
-                )}
+                        <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg">
+                          <div className="text-white">
+                            {post.username && (
+                              <p className="font-racing-sans text-lg leading-tight">@{post.username}</p>
+                            )}
+                            {post.name && (
+                              <p className="text-sm text-gray-200 mt-1 leading-tight">{post.name}</p>
+                            )}
+                            {post.totalSupply !== undefined && (
+                              <p className="text-xs text-gray-300 mt-2 leading-tight">
+                                #{(post.soldCount || 0) + 1}/{post.totalSupply}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Like and ShoppingCart buttons - bottom right overlay on poster image */}
+                      <div
+                        className="absolute flex flex-row gap-2 z-10 pointer-events-auto transition-opacity duration-300"
+                        style={{
+                          right: `${(containerRef.current?.getBoundingClientRect().width || 0) - imageBounds.left - imageBounds.width + 16}px`,
+                          bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
+                          opacity: isHovered ? 1 : 0,
+                        }}
+                      >
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLike();
+                          }}
+                          className="bg-gray-800/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-700 transition-colors relative shadow-lg"
+                          aria-label={hasLiked ? "Unlike" : "Like"}
+                        >
+                          <Heart
+                            size={20}
+                            className={hasLiked ? "text-red-500 fill-red-500" : "text-gray-300"}
+                          />
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCatalogue();
+                          }}
+                          className="bg-gray-800/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-700 transition-colors shadow-lg"
+                          aria-label="View in catalogue"
+                        >
+                          <ShoppingCart size={20} className="text-gray-300" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-
-              {/* Poster overlay that appears at selected frame - use thumbnail for faster loading */}
-              <div className="absolute inset-0 pointer-events-none">
+            ) : (
+              // Static poster display - use thumbnail for faster loading
+              <div
+                className="relative w-full h-full"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                onTouchStart={() => setIsHovered(true)}
+                onTouchEnd={() => setTimeout(() => setIsHovered(false), 2000)}
+              >
                 <img
-                  id={`poster-overlay-${post.id}`}
+                  ref={imageRef}
                   src={`${import.meta.env.VITE_API_URL}/api/storage-image/${post.thumbnailPath || post.generatedPath}`}
-                  className="w-full h-full object-contain transition-opacity duration-500 opacity-0 pointer-events-none"
-                  alt="Generated poster at selected frame"
+                  className=""
+                  style={{
+                    width: calculatedImageSize ? `${calculatedImageSize.width}px` : '100%',
+                    height: calculatedImageSize ? `${calculatedImageSize.height}px` : 'auto',
+                    objectFit: 'contain'
+                  }}
+                  alt="Generated poster"
                   onLoad={() => setIsLoading(false)}
                   onError={() => setIsLoading(false)}
                 />
-                {imageBounds && (
+                {/* Poster data - bottom left overlay on image - positioned on actual image */}
+                {imageBounds && isHovered && (
                   <>
                     <div
-                      className="absolute z-10 pointer-events-auto"
+                      className="absolute z-10 transition-opacity duration-300"
                       style={{
                         left: `${imageBounds.left + 16}px`,
                         bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
+                        opacity: isHovered ? 1 : 0,
                       }}
                     >
                       <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg">
@@ -503,12 +674,13 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
                       </div>
                     </div>
 
-                    {/* Like and ShoppingCart buttons - bottom right overlay on poster image */}
+                    {/* Like and ShoppingCart buttons - bottom right overlay on image */}
                     <div
-                      className="absolute flex flex-row gap-2 z-10 pointer-events-auto"
+                      className="absolute flex flex-row gap-2 z-10 transition-opacity duration-300"
                       style={{
                         right: `${(containerRef.current?.getBoundingClientRect().width || 0) - imageBounds.left - imageBounds.width + 16}px`,
                         bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
+                        opacity: isHovered ? 1 : 0,
                       }}
                     >
                       <button
@@ -539,101 +711,20 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
                   </>
                 )}
               </div>
+            )}
 
-            </div>
-          ) : (
-            // Static poster display - use thumbnail for faster loading
-            <div className="relative w-full h-full">
-              <img
-                ref={imageRef}
-                src={`${import.meta.env.VITE_API_URL}/api/storage-image/${post.thumbnailPath || post.generatedPath}`}
-                className="w-full h-full object-contain"
-                alt="Generated poster"
-                onLoad={() => setIsLoading(false)}
-                onError={() => setIsLoading(false)}
-              />
-              {/* Poster data - bottom left overlay on image - positioned on actual image */}
-              {imageBounds && (
-                <>
-                  <div
-                    className="absolute z-10"
-                    style={{
-                      left: `${imageBounds.left + 16}px`,
-                      bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
-                    }}
-                  >
-                    <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg">
-                      <div className="text-white">
-                        {post.username && (
-                          <p className="font-racing-sans text-lg leading-tight">@{post.username}</p>
-                        )}
-                        {post.name && (
-                          <p className="text-sm text-gray-200 mt-1 leading-tight">{post.name}</p>
-                        )}
-                        {post.totalSupply !== undefined && (
-                          <p className="text-xs text-gray-300 mt-2 leading-tight">
-                            #{(post.soldCount || 0) + 1}/{post.totalSupply}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Like and ShoppingCart buttons - bottom right overlay on image */}
-                  <div
-                    className="absolute flex flex-row gap-2 z-10"
-                    style={{
-                      right: `${(containerRef.current?.getBoundingClientRect().width || 0) - imageBounds.left - imageBounds.width + 16}px`,
-                      bottom: `${(containerRef.current?.getBoundingClientRect().height || 0) - imageBounds.top - imageBounds.height + 16}px`,
-                    }}
-                  >
-                    {/* Like button with count inside */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLike();
-                      }}
-                      className="bg-gray-800/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-700 transition-colors relative shadow-lg"
-                      aria-label={hasLiked ? "Unlike" : "Like"}
-                    >
-                      <Heart
-                        size={20}
-                        className={hasLiked ? "text-red-500 fill-red-500" : "text-gray-300"}
-                      />
-                    </button>
-
-                    {/* Catalogue button */}
-                    <button
-                      onClick={handleCatalogue}
-                      className="bg-gray-800/80 p-2 rounded-full hover:bg-gray-700 transition-colors"
-                      aria-label="View in catalogue"
-                    >
-                      <ShoppingCart size={20} className="text-gray-300" />
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-
-          {/* Loading overlay */}
-          {isLoading && (
-            <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-              <div className="text-white text-sm">Loading...</div>
-            </div>
-          )}
+            {/* Loading overlay */}
+            {isLoading && (
+              <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                <div className="text-white text-sm">Loading...</div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Price below poster */}
-      <div className="w-full mt-2 flex-shrink-0 flex justify-center">
-        <p className="text-gray-300 text-sm font-medium">
-          CHF {(post.pricePerUnit || 29.95).toFixed(2)}
-        </p>
-      </div >
-
       {/* Login Modal */}
-      < LoginModal
+      <LoginModal
         open={showLoginModal}
         onOpenChange={(open) => {
           setShowLoginModal(open);
@@ -641,42 +732,37 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
             // If modal closed and user is now logged in, retry the like
             handleLike();
           }
-        }
-        }
+        }}
       />
 
       {/* Share Modal */}
-      {
-        showShareModal && (
-          <ShareModal
-            isOpen={showShareModal}
-            onClose={() => setShowShareModal(false)}
-            imageUrl={`${import.meta.env.VITE_API_URL}/api/storage-image/${post.generatedPath}`}
-            shareContext="catalogue"
-            posterId={post.id}
-          />
-        )
-      }
+      {showShareModal && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          imageUrl={`${import.meta.env.VITE_API_URL}/api/storage-image/${post.generatedPath}`}
+          shareContext="catalogue"
+          posterId={post.id}
+        />
+      )}
 
       {/* Catalogue Modal */}
-      {
-        showCatalogueModal && (
-          <CatalogueImageModal
-            isOpen={showCatalogueModal}
-            onClose={() => setShowCatalogueModal(false)}
-            imageUrl={`${import.meta.env.VITE_API_URL}/api/storage-image/${post.generatedPath}`}
-            style={post.style}
-            id={post.id}
-            username={post.username}
-            totalSupply={post.totalSupply}
-            soldCount={post.soldCount}
-            pricePerUnit={post.pricePerUnit}
-            remainingSupply={post.totalSupply ? post.totalSupply - (post.soldCount || 0) : undefined}
-            isAvailable={post.totalSupply !== undefined && (post.soldCount || 0) < post.totalSupply}
-          />
-        )
-      }
-    </div >
+      {showCatalogueModal && (
+        <CatalogueImageModal
+          isOpen={showCatalogueModal}
+          onClose={() => setShowCatalogueModal(false)}
+          imageUrl={`${import.meta.env.VITE_API_URL}/api/storage-image/${post.generatedPath}`}
+          style={post.style}
+          id={post.id}
+          username={post.username}
+          totalSupply={post.totalSupply}
+          soldCount={post.soldCount}
+          pricePerUnit={post.pricePerUnit}
+          remainingSupply={post.totalSupply ? post.totalSupply - (post.soldCount || 0) : undefined}
+          isAvailable={post.totalSupply !== undefined && (post.soldCount || 0) < post.totalSupply}
+        />
+      )}
+    </div>
   );
 }
 

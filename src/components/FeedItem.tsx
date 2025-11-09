@@ -40,7 +40,7 @@ interface FeedItemProps {
 
 // Helper function to show poster for full duration
 function showPosterForFullDuration(
-  videoRef: HTMLVideoElement | null, 
+  videoRef: HTMLVideoElement | null,
   posterOverlay: HTMLElement | null,
   isPosterShowing: React.MutableRefObject<boolean>,
   hasPausedForPoster: React.MutableRefObject<boolean>,
@@ -48,26 +48,26 @@ function showPosterForFullDuration(
   onComplete: () => void
 ) {
   if (!videoRef || !posterOverlay) return;
-  
+
   // Mark that we're showing the poster
   hasPausedForPoster.current = true;
   isPosterShowing.current = true;
-  
+
   // Pause video and show poster
   videoRef.pause();
   videoRef.style.opacity = '0';
   posterOverlay.style.opacity = '1';
-  
+
   // Clear any existing timeout
   if (posterTimeoutRef.current) {
     clearTimeout(posterTimeoutRef.current);
   }
-  
+
   // After 3 seconds, hide poster and restart video
   posterTimeoutRef.current = setTimeout(() => {
     if (posterOverlay && videoRef) {
       posterOverlay.style.opacity = '0';
-      
+
       setTimeout(() => {
         if (videoRef) {
           videoRef.style.opacity = '1';
@@ -98,7 +98,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  
+
   const handleLike = useCallback(async () => {
     if (!user) {
       setShowLoginModal(true);
@@ -107,7 +107,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
 
     try {
       const response = await apiRequest('POST', `/api/posters/${post.id}/like`);
-      
+
       if (response.ok) {
         const data = await response.json();
         setLikeCount(data.likeCount);
@@ -123,7 +123,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
     } catch (error) {
       console.error('Error liking post:', error);
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Unable to like post",
         variant: "destructive",
       });
@@ -144,7 +144,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
     if ((post.originalVideoPath || post.compressedVideoPath) && typeof post.videoFrameTimestamp === 'number') {
       // Prefer compressed video if available, fallback to original
       const videoPath = post.compressedVideoPath || post.originalVideoPath;
-      
+
       fetch(`${import.meta.env.VITE_API_URL}/api/storage-image/${videoPath}`, { method: 'HEAD' })
         .then(response => {
           if (response.ok) {
@@ -178,25 +178,25 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
         videoRef.current.currentTime = 0; // Reset when not visible
         hasPausedForPoster.current = false; // Reset flag
         isPosterShowing.current = false; // Reset poster showing flag
-        
+
         // Clear any pending poster timeout
         if (posterTimeoutRef.current) {
           clearTimeout(posterTimeoutRef.current);
           posterTimeoutRef.current = null;
         }
-        
+
         // Reset poster overlay
         const posterOverlay = document.getElementById(`poster-overlay-${post.id}`);
         if (posterOverlay) {
           posterOverlay.style.opacity = '0';
         }
-        
+
         // Reset video opacity
         videoRef.current.style.opacity = '1';
       }
     }
   }, [isVisible, showVideoTransition, post.id]);
-  
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -221,29 +221,27 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
               onPrevious?.();
             }}
             disabled={!hasPrevious}
-            className={`bg-gray-800/80 p-2 rounded-full transition-colors ${
-              hasPrevious ? 'hover:bg-gray-700' : 'opacity-50 cursor-not-allowed'
-            }`}
+            className={`bg-gray-800/80 p-2 rounded-full transition-colors ${hasPrevious ? 'hover:bg-gray-700' : 'opacity-50 cursor-not-allowed'
+              }`}
             aria-label="Previous post"
           >
             <ChevronUp size={20} className="text-gray-300" />
           </button>
-          
+
           <button
             onClick={(e) => {
               e.stopPropagation();
               onNext?.();
             }}
             disabled={!hasNext}
-            className={`bg-gray-800/80 p-2 rounded-full transition-colors ${
-              hasNext ? 'hover:bg-gray-700' : 'opacity-50 cursor-not-allowed'
-            }`}
+            className={`bg-gray-800/80 p-2 rounded-full transition-colors ${hasNext ? 'hover:bg-gray-700' : 'opacity-50 cursor-not-allowed'
+              }`}
             aria-label="Next post"
           >
             <ChevronDown size={20} className="text-gray-300" />
           </button>
         </div>
-        
+
         {/* Main content container */}
         <div className="flex flex-col items-center flex-1">
           {/* Poster name above thumbnail */}
@@ -252,14 +250,14 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
               {post.name}
             </h2>
           )}
-          
+
           {/* Video transition or static poster */}
           <div className={containerClasses} style={aspectRatio}>
             <div className="w-full h-full bg-white p-[18px] flex items-center justify-center">
               {showVideoTransition && videoObjectUrl && post.videoFrameTimestamp !== undefined ? (
                 <div className="relative w-full h-full">
                   {/* Base video that loops */}
-                  <video 
+                  <video
                     ref={videoRef}
                     src={videoObjectUrl}
                     className="w-full h-full object-contain transition-opacity duration-500"
@@ -280,20 +278,20 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
                     onError={() => setIsLoading(false)}
                     onTimeUpdate={() => {
                       if (!videoRef.current || typeof post.videoFrameTimestamp !== 'number') return;
-                      
+
                       // Don't process if poster is currently showing
                       if (isPosterShowing.current) return;
-                      
+
                       const currentTime = videoRef.current.currentTime;
                       const targetTime = post.videoFrameTimestamp;
                       const posterDisplayDuration = 3;
-                      
+
                       const posterOverlay = document.getElementById(`poster-overlay-${post.id}`);
                       if (!posterOverlay) {
                         console.log(`❌ Poster overlay not found for ${post.id}`);
                         return;
                       }
-                      
+
                       // Check if we've reached the target timestamp and haven't already paused
                       if (currentTime >= targetTime && !hasPausedForPoster.current && !videoRef.current.paused) {
                         console.log(`🎬 Poster fade-in at ${targetTime}s for 3 seconds`);
@@ -306,12 +304,12 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
                           () => console.log(`🎬 Poster cycle complete`)
                         );
                       }
-                      
+
                       // Also check if we're near the end and should prepare for poster display
-                      if (videoRef.current.duration && 
-                          currentTime >= videoRef.current.duration - 0.5 && 
-                          targetTime >= videoRef.current.duration - 0.5 &&
-                          !hasPausedForPoster.current) {
+                      if (videoRef.current.duration &&
+                        currentTime >= videoRef.current.duration - 0.5 &&
+                        targetTime >= videoRef.current.duration - 0.5 &&
+                        !hasPausedForPoster.current) {
                         // Frame is selected at or near video end - prepare to show poster when video ends
                         console.log(`🎬 Frame near end detected - will show poster on video end`);
                       }
@@ -340,7 +338,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
                       }
                     }}
                   />
-                  
+
                   {/* Poster overlay that appears at selected frame - use thumbnail for faster loading */}
                   <img
                     id={`poster-overlay-${post.id}`}
@@ -370,7 +368,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
               )}
             </div>
           </div>
-          
+
           {/* Creator name and price below poster - single line */}
           <div className="w-full sm:max-w-[350px] mt-2">
             <div className="flex items-center justify-between">
@@ -382,7 +380,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
                   </p>
                 )}
               </div>
-              
+
               {/* Edition and price - right */}
               <div className="flex items-center gap-2">
                 {/* Edition number (all posters are limited editions) */}
@@ -391,7 +389,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
                     #{post.soldCount + 1}/{post.totalSupply}
                   </p>
                 )}
-                
+
                 {/* Price */}
                 <p className="text-gray-300 text-sm font-medium">
                   CHF {(post.pricePerUnit || 29.95).toFixed(2)}
@@ -400,7 +398,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
             </div>
           </div>
         </div>
-        
+
         {/* Like, Share and Catalogue buttons - right side */}
         <div className="flex flex-col gap-2">
           {/* Like button with count inside */}
@@ -412,17 +410,12 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
             className="bg-gray-800/80 p-2 rounded-full hover:bg-gray-700 transition-colors relative"
             aria-label={hasLiked ? "Unlike" : "Like"}
           >
-            <Heart 
-              size={20} 
+            <Heart
+              size={20}
               className={hasLiked ? "text-red-500 fill-red-500" : "text-gray-300"}
             />
-            {likeCount > 0 && (
-              <span className="absolute inset-0 flex items-center justify-center text-white text-[10px] font-bold">
-                {likeCount}
-              </span>
-            )}
           </button>
-          
+
           {/* Catalogue button */}
           <button
             onClick={handleCatalogue}
@@ -433,7 +426,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
           </button>
         </div>
       </div>
-      
+
       {/* Login Modal */}
       <LoginModal
         open={showLoginModal}
@@ -445,7 +438,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
           }
         }}
       />
-      
+
       {/* Share Modal */}
       {showShareModal && (
         <ShareModal
@@ -456,7 +449,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext }:
           posterId={post.id}
         />
       )}
-      
+
       {/* Catalogue Modal */}
       {showCatalogueModal && (
         <CatalogueImageModal

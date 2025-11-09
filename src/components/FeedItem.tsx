@@ -305,7 +305,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
   }, []);
 
   return (
-    <div className="flex flex-col items-center w-full h-full relative px-4 py-2">
+    <div className="flex flex-col items-center w-full h-full relative py-2">
       {/* Poster name above thumbnail */}
       {post.name && (
         <h2 className="text-white text-lg font-semibold mb-2 text-center flex-shrink-0">

@@ -31,6 +31,8 @@ interface CatalogueImageModalProps {
   onOpenCart?: () => void; // Callback to open the cart modal
   onShare?: (imageUrl: string, posterId?: string) => void; // Callback to open the share modal
   isAdminView?: boolean; // Flag to disable download prevention for admin view
+  hideCart?: boolean; // Flag to hide the cart button
+  cafePartner?: { logo: string; name: string; url: string }; // Cafe partner info
 }
 
 export default function CatalogueImageModal({
@@ -68,7 +70,7 @@ export default function CatalogueImageModal({
   // Function to get the appropriate social media icon
   const getSocialIcon = (url: string) => {
     const lowerUrl = url.toLowerCase();
-    
+
     if (lowerUrl.includes('instagram.com')) {
       return <SiInstagram size={20} />;
     } else if (lowerUrl.includes('tiktok.com')) {
@@ -111,15 +113,15 @@ export default function CatalogueImageModal({
       quantity: 1,
       isLimitedEdition: true // All posters are limited edition
     });
-    
+
     setAdded(true);
-    
+
     // Show toast notification
     toast({
       title: "Item added to cart",
       duration: 2000,
     });
-    
+
     // Show "Added" for 1.5 seconds, then change to "Go to Cart"
     setTimeout(() => {
       setShowGoToCart(true);
@@ -142,7 +144,7 @@ export default function CatalogueImageModal({
           <DialogTitle>Poster Details</DialogTitle>
         </VisuallyHidden>
         <div className="relative w-full h-full flex flex-col items-center p-4">
-          
+
           {/* Poster container with white border */}
           <div className="flex items-center justify-center w-full min-h-[300px]">
             {/* Loading spinner - shown without white background */}
@@ -151,7 +153,7 @@ export default function CatalogueImageModal({
                 <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
               </div>
             )}
-            
+
             {/* Image container with white border and gallery-style labels */}
             {!imageLoading && (
               <div className="flex flex-col items-center">
@@ -161,10 +163,10 @@ export default function CatalogueImageModal({
                     {name}
                   </h2>
                 )}
-                
-                <div 
+
+                <div
                   className="bg-white p-4 md:p-6 shadow-xl rounded-sm relative"
-                  style={{ 
+                  style={{
                     width: "auto",
                     height: "auto",
                     maxWidth: "90%",
@@ -188,7 +190,7 @@ export default function CatalogueImageModal({
                     }}
                   />
                 </div>
-                
+
                 {/* Gallery-style placard underneath the frame */}
                 <div className="w-full max-w-[90%] mt-2 px-2">
                   {/* Single line with username, supply, and price */}
@@ -199,14 +201,14 @@ export default function CatalogueImageModal({
                         @{username}
                       </p>
                     )}
-                    
+
                     {/* Supply info - center (all posters are limited edition now) */}
                     {soldCount !== undefined && totalSupply && (
                       <p className={`text-sm font-medium ${soldCount >= totalSupply - 5 ? 'text-red-400' : 'text-gray-300'}`}>
                         #{soldCount + 1}/{totalSupply}
                       </p>
                     )}
-                    
+
                     {/* Price - right */}
                     <p className="text-gray-300 text-sm font-medium">
                       CHF {price.toFixed(2)}.-
@@ -215,7 +217,7 @@ export default function CatalogueImageModal({
                 </div>
               </div>
             )}
-            
+
             {/* Hidden image for loading detection */}
             <img
               src={import.meta.env.VITE_API_URL + imageUrl}
@@ -225,10 +227,10 @@ export default function CatalogueImageModal({
               onError={() => setImageLoading(false)}
             />
           </div>
-          
+
           {/* Add to Cart and Close button section */}
           <div className="flex items-center justify-center space-x-4 mt-6 w-full max-w-md">
-            
+
             {/* Social Link button - only show if momentLink exists */}
             {momentLink && (
               <button
@@ -239,17 +241,16 @@ export default function CatalogueImageModal({
                 {getSocialIcon(momentLink)}
               </button>
             )}
-            
+
             {/* Add to Cart button */}
             <button
               onClick={showGoToCart ? handleGoToCart : handleAddToCart}
-              className={`${
-                showGoToCart 
-                  ? 'bg-blue-600 hover:bg-blue-700' 
-                  : added 
-                    ? 'bg-green-600 hover:bg-green-700' 
+              className={`${showGoToCart
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : added
+                    ? 'bg-green-600 hover:bg-green-700'
                     : 'bg-gray-700 hover:bg-gray-600'
-              } text-white rounded-full p-2 flex items-center justify-center transition-colors`}
+                } text-white rounded-full p-2 flex items-center justify-center transition-colors`}
               aria-label={showGoToCart ? "Go to Cart" : added ? "Added to Cart" : "Add to Cart"}
               disabled={added && !showGoToCart}
             >
@@ -261,7 +262,7 @@ export default function CatalogueImageModal({
                 <ShoppingCart size={20} />
               )}
             </button>
-            
+
             {/* Custom close button */}
             <button
               onClick={onClose}

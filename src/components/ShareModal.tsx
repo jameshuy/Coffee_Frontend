@@ -9,7 +9,7 @@ interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
   imageUrl: string | null;
-  shareContext?: 'catalogue' | 'dashboard' | 'generation';
+  shareContext?: 'catalogue' | 'dashboard' | 'generation' | 'collection';
   posterId?: string;
 }
 

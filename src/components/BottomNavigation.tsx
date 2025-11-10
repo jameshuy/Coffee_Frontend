@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Camera, Layers, User, LogOut } from "lucide-react";
+import { Home, Camera, Layers, Store, User, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import ImageSourceModal from "./ImageSourceModal";
@@ -17,6 +17,7 @@ export default function BottomNavigation() {
     const isFeedPage = location === "/winners" || location === "/feed";
     const isCreatePage = location === "/create";
     const isCataloguePage = location === "" || location === "/catalogue";
+    const isCollectionPage = location === "/collection"
     const isDashboardPage = location === "/dashboard";
     const isSettingsPage = location === "/settings";
 
@@ -55,10 +56,17 @@ export default function BottomNavigation() {
                             </div>
                         </Link>
 
+                        <Link href="/collection">
+                            <div className={`p-2 transition-colors cursor-pointer ${isCollectionPage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
+                                }`}>
+                                <Layers size={24} />
+                            </div>
+                        </Link>
+
                         <Link href="/catalogue">
                             <div className={`p-2 transition-colors cursor-pointer ${isCataloguePage ? 'text-[#f1b917]' : 'text-white hover:text-[#f1b917]'
                                 }`}>
-                                <Layers size={24} />
+                                <Store size={24} />
                             </div>
                         </Link>
 

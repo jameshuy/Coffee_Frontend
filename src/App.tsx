@@ -10,6 +10,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Create from "@/pages/Create";
 import Feed from "@/pages/Feed";
+import Collection from "./pages/Collection";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminOrders from "@/pages/AdminOrders";
 import AdminCatalogue from "@/pages/AdminCatalogue";
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/create" component={Create} />
       <Route path="/feed" component={Feed} />
+      <Route path="/collection" component={Collection} />
       <Route path="/catalogue" component={Catalogue} />
       <Route path="/dashboard" component={Dashboard} />
       {/* <Route path="/settings" component={Settings} /> */}
@@ -39,7 +41,7 @@ function Router() {
       <Route path="/restock">
         <ExternalRedirect to={`${import.meta.env.VITE_API_URL}/restock`} />
       </Route>
-      
+
       <Route path="/admin">
         <Redirect to="/admin/login" />
       </Route>

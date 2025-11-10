@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Camera, Layers, User, LogOut, Settings } from 'lucide-react';
+import { Home, Camera, Layers, Store, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiRequest } from '@/lib/queryClient';
@@ -23,6 +23,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
     isEarnPage,
     isCreatePage,
     isFeedPage,
+    isCollectionPage,
     isPartnersPage,
   } = useMemo(() => ({
     isLandingPage: location === "/",
@@ -32,6 +33,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
     isEarnPage: location === "/earn",
     isCreatePage: location === "/create",
     isFeedPage: location === "/feed",
+    isCollectionPage: location == "/collection",
     isPartnersPage: location === "/partners",
   }), [location]);
 
@@ -93,7 +95,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
     <nav className={`${isLandingPage ? '' : 'fixed top-0 left-0 right-0 z-40'} ${transparent ? 'bg-transparent' : 'bg-black'} shadow-sm pt-3 pb-2`}>
       <div className="container mx-auto px-4">
         <div className={`w-full relative ${isMobile && !isLandingPage ? 'border-b' : ''}`}>
-          {isCreatePage || isFeedPage ? (
+          {isCreatePage || isFeedPage || isCollectionPage ? (
             // Create and Feed pages: same layout as catalogue page
             <div className="flex flex-col justify-center items-center text-center">
               <div className="flex flex-wrap items-end justify-center">
@@ -107,6 +109,9 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                 )}
                 {!isMobile && isCreatePage && (
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Create</span>
+                )}
+                {!isMobile && isCollectionPage && (
+                  <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">The Café Collection</span>
                 )}
               </div>
 
@@ -136,8 +141,12 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                         <Camera size={24} />
                       </NavIcon>
 
-                      <NavIcon href="/catalogue" active={isCataloguePage}>
+                      <NavIcon href="/collection" active={isCollectionPage}>
                         <Layers size={24} />
+                      </NavIcon>
+
+                      <NavIcon href="/catalogue" active={isCataloguePage}>
+                        <Store size={24} />
                       </NavIcon>
 
                       <NavIcon href="/dashboard" active={isDashboardPage}>
@@ -271,6 +280,9 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                   <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">Partners</span>
                 )} */}
               </div>
+              {!isMobile && isCollectionPage && (
+                <span className="text-xl text-white font-racing-sans ml-2 mb-1.5 align-bottom">The Café Collection</span>
+              )}
             </div>
           )}
 

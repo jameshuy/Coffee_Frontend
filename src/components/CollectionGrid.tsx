@@ -82,7 +82,7 @@ export default function CollectionGrid({ images, isLoading, onShare, targetPoste
                                 <div className="absolute inset-0 bg-white p-4 md:p-6">
                                     <div className="relative w-full h-full bg-black overflow-hidden">
                                         <img
-                                            src={image.imageUrl}
+                                            src={import.meta.env.VITE_API_URL + image.imageUrl}
                                             alt={`${image.style} poster`}
                                             className="w-full h-full object-cover object-center"
                                             loading="lazy"

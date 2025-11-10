@@ -6,6 +6,8 @@ import ShareModal from "@/components/ShareModal";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useCollectionImages } from "@/hooks/useCollectionImages";
+import { useIsMobile } from "@/hooks/use-mobile";
+import Footer from "@/components/Footer";
 
 export default function Collection() {
     const [showShareModal, setShowShareModal] = useState(false);
@@ -14,6 +16,8 @@ export default function Collection() {
     const [targetPosterId, setTargetPosterId] = useState<string | null>(null);
     const [location, setLocation] = useLocation();
     const { data: images = [], isLoading } = useCollectionImages();
+
+    const isMobile = useIsMobile();
 
     // Handle URL parameters for direct poster links
     useEffect(() => {
@@ -82,7 +86,7 @@ export default function Collection() {
                 />
             </main>
 
-            <BottomNavigation />
+            {!isMobile ? <Footer showTopLine={true} /> : <BottomNavigation />}
         </div>
     );
 }

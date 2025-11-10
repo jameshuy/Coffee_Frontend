@@ -76,15 +76,6 @@ export default function BottomNavigation() {
                                 <User size={24} />
                             </div>
                         </Link>
-
-                        {isAuthenticated &&
-                            <button
-                                onClick={logout}
-                                className="p-2 text-white hover:text-red-400 transition-colors cursor-pointer"
-                            >
-                                <LogOut size={24} />
-                            </button>
-                        }
                     </>
                 </div>
             </div>

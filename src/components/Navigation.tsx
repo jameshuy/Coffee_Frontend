@@ -246,9 +246,20 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                         <LogOut size={24} />
                       </button>
                     </div>) : (
-                    <NavIcon href="/settings" active={isSettingsPage}>
-                      <Settings size={24} />
-                    </NavIcon>
+                    <div className="flex">
+                      <NavIcon href="/settings" active={isSettingsPage}>
+                        <Settings size={24} />
+                      </NavIcon>
+
+                      {isAuthenticated &&
+                        <button
+                          onClick={logout}
+                          className="p-2 text-white hover:text-red-400 transition-colors cursor-pointer"
+                        >
+                          <LogOut size={24} />
+                        </button>
+                      }
+                    </div>
                   )
                 )}
               </div>

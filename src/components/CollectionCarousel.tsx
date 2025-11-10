@@ -273,7 +273,7 @@ export default function CollectionCarousel({ images, isLoading, onShare, targetP
                                 {/* Poster image */}
                                 <img
                                     ref={imageRef}
-                                    src={image.imageUrl}
+                                    src={import.meta.env.VITE_API_URL + image.imageUrl}
                                     alt={`${image.style} poster`}
                                     className=""
                                     style={{

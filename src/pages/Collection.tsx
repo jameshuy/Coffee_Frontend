@@ -60,8 +60,8 @@ export default function Collection() {
                 </div>
 
                 {/* Desktop Grid - hidden on small screens, visible on larger */}
-                <div className="hidden sm:flex flex-1 items-center justify-center px-8 overflow-y-auto pb-4 pt-32">
-                    <div className="w-full max-w-7xl">
+                <div className="hidden sm:flex flex-1 items-center justify-center px-8 overflow-y-auto pb-4 pt-64">
+                    <div className="w-full max-w-7xl pt-[300px]">
                         <CollectionGrid
                             images={images}
                             isLoading={isLoading}

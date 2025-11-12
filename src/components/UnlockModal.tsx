@@ -203,10 +203,10 @@ export function UnlockModal({ open, onOpenChange, posterId, posterUrl, onUnlockS
             <DialogContent className="top-[50%] translate-y-[-50%] sm:max-w-[450px] bg-black border-[#f1b917] text-white">
                 <DialogHeader>
                     <DialogTitle className="text-center font-racing text-2xl text-[#f1b917] mb-1" style={{ fontFamily: "'Racing Sans One', cursive" }}>
-                        Unlock Your Poster's Potential
+                        Unlock Your Print's Potential
                     </DialogTitle>
                     <DialogDescription className="text-center text-gray-300 text-sm">
-                        One-time €3 investment • Unlimited earning potential
+                        One-time €3 investment • Earn up to €1000 per design
                     </DialogDescription>
                 </DialogHeader>
 
@@ -215,22 +215,17 @@ export function UnlockModal({ open, onOpenChange, posterId, posterUrl, onUnlockS
                     <div className="mb-3 p-3 bg-gray-900/50 rounded-lg">
                         <ul className="space-y-3">
                             <li className="flex items-start">
+                                <Tag className="mr-2 h-4 w-4 text-[#f1b917] mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-white font-semibold text-sm">Turn €3 into €30+</p>
+                                    <p className="text-gray-400 text-xs">Join the collection • Get voted into cafés • Earn €5 per sale</p>
+                                </div>
+                            </li>
+                            <li className="flex items-start pt-3">
                                 <Download className="mr-2 h-4 w-4 text-[#f1b917] mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-white font-semibold text-sm">Instant HD Download</p>
                                     <p className="text-gray-400 text-xs">A3 print-ready file • Professional quality • Yours forever</p>
-                                </div>
-                            </li>
-                            <li className="flex items-start relative pt-3">
-                                <div className="absolute -top-0 left-0 bg-gradient-to-r from-[#f1b917] to-[#ffd700] text-black text-[9px] font-bold px-1.5 py-0.5 rounded">
-                                    💰 10X VALUE
-                                </div>
-                            </li>
-                            <li className="flex items-start relative">
-                                <Tag className="mr-2 h-4 w-4 text-[#f1b917] mt-1 flex-shrink-0" />
-                                <div>
-                                    <p className="text-white font-semibold text-sm">Turn €3 into €30+</p>
-                                    <p className="text-gray-400 text-xs">Set your price • Get featured • Earn from every collector purchase</p>
                                 </div>
                             </li>
                             <li className="flex items-start">

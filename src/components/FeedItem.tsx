@@ -101,6 +101,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const generatedImageRef = useRef<HTMLImageElement>(null);
   const hasPausedForPoster = useRef(false);
   const isPosterShowing = useRef(false);
   const posterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -108,7 +109,8 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  // Calculate container height based on image aspect ratio to maintain 18px border on all sides
+  // Calculate container height based on generated image aspect ratio to maintain 18px border on all sides
+  // Always use generated image dimensions so videos match image size
   const calculateContainerHeight = useCallback(() => {
     const imageContainer = imageContainerRef.current;
     if (!imageContainer) return;
@@ -123,24 +125,26 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
 
     if (availableWidth === 0) return;
 
-    // Get the media element (video or image)
-    const videoElement = videoRef.current;
+    // Always use generated image dimensions for sizing (not video dimensions)
+    // This ensures videos match the same size as generated images
+    const generatedImageElement = generatedImageRef.current;
     const imageElement = imageRef.current;
-
+    
     let naturalWidth = 0;
     let naturalHeight = 0;
 
-    if (videoElement) {
-      naturalWidth = videoElement.videoWidth || 0;
-      naturalHeight = videoElement.videoHeight || 0;
-    } else if (imageElement) {
-      naturalWidth = imageElement.naturalWidth || 0;
-      naturalHeight = imageElement.naturalHeight || 0;
+    // Prefer generated image ref (hidden image that loads the generated image)
+    if (generatedImageElement && generatedImageElement.naturalWidth > 0) {
+      naturalWidth = generatedImageElement.naturalWidth;
+      naturalHeight = generatedImageElement.naturalHeight;
+    } else if (imageElement && imageElement.naturalWidth > 0) {
+      naturalWidth = imageElement.naturalWidth;
+      naturalHeight = imageElement.naturalHeight;
     }
 
     if (naturalWidth === 0 || naturalHeight === 0) return;
 
-    // Calculate aspect ratio
+    // Calculate aspect ratio based on generated image
     const mediaAspect = naturalWidth / naturalHeight;
 
     // With 18px padding on each side (36px total), calculate image width
@@ -163,6 +167,7 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
   }, [containerHeight]);
 
   // Calculate actual image/video bounds when using object-contain
+  // Always use generated image dimensions so videos match image size
   const calculateImageBounds = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -171,24 +176,25 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
     const containerWidth = containerRect.width;
     const containerHeight = containerRect.height;
 
-    // Get the media element (video or image)
-    const videoElement = videoRef.current;
+    // Always use generated image dimensions for bounds calculation (not video dimensions)
+    const generatedImageElement = generatedImageRef.current;
     const imageElement = imageRef.current;
 
     let naturalWidth = 0;
     let naturalHeight = 0;
 
-    if (videoElement) {
-      naturalWidth = videoElement.videoWidth || 0;
-      naturalHeight = videoElement.videoHeight || 0;
-    } else if (imageElement) {
-      naturalWidth = imageElement.naturalWidth || 0;
-      naturalHeight = imageElement.naturalHeight || 0;
+    // Prefer generated image ref (hidden image that loads the generated image)
+    if (generatedImageElement && generatedImageElement.naturalWidth > 0) {
+      naturalWidth = generatedImageElement.naturalWidth;
+      naturalHeight = generatedImageElement.naturalHeight;
+    } else if (imageElement && imageElement.naturalWidth > 0) {
+      naturalWidth = imageElement.naturalWidth;
+      naturalHeight = imageElement.naturalHeight;
     }
 
     if (naturalWidth === 0 || naturalHeight === 0) return;
 
-    // Calculate aspect ratios
+    // Calculate aspect ratios based on generated image
     const containerAspect = containerWidth / containerHeight;
     const mediaAspect = naturalWidth / naturalHeight;
 
@@ -234,6 +240,10 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
     if (imageRef.current) {
       imageRef.current.addEventListener('load', updateBounds);
     }
+    // Listen to generated image load for sizing calculations
+    if (generatedImageRef.current) {
+      generatedImageRef.current.addEventListener('load', updateBounds);
+    }
 
     const resizeObserver = new ResizeObserver(updateBounds);
     if (containerRef.current) {
@@ -251,9 +261,33 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
       if (imageRef.current) {
         imageRef.current.removeEventListener('load', updateBounds);
       }
+      if (generatedImageRef.current) {
+        generatedImageRef.current.removeEventListener('load', updateBounds);
+      }
       resizeObserver.disconnect();
     };
   }, [calculateImageBounds, showVideoTransition]);
+
+  // Recalculate container height when generated image loads
+  useEffect(() => {
+    const updateHeight = () => {
+      calculateContainerHeight();
+    };
+
+    if (generatedImageRef.current) {
+      generatedImageRef.current.addEventListener('load', updateHeight);
+      // If already loaded, trigger immediately
+      if (generatedImageRef.current.complete && generatedImageRef.current.naturalWidth > 0) {
+        updateHeight();
+      }
+    }
+
+    return () => {
+      if (generatedImageRef.current) {
+        generatedImageRef.current.removeEventListener('load', updateHeight);
+      }
+    };
+  }, [calculateContainerHeight]);
 
   const handleLike = useCallback(async () => {
     if (!user) {
@@ -364,6 +398,18 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
 
   return (
     <div className="flex flex-col items-center w-full h-full relative py-2">
+      {/* Hidden image to load generated image and get its dimensions for sizing */}
+      <img
+        ref={generatedImageRef}
+        src={`${import.meta.env.VITE_API_URL}/api/storage-image/${post.generatedPath}`}
+        alt=""
+        className="hidden"
+        style={{ display: 'none' }}
+        onLoad={() => {
+          calculateContainerHeight();
+          calculateImageBounds();
+        }}
+      />
 
       {/* Video transition or static poster - fill remaining space */}
       <div className="w-full relative flex-1 min-h-0 flex items-center justify-center">

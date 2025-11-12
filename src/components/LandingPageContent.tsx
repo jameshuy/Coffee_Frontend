@@ -93,10 +93,10 @@ export default function LandingPageContent() {
           Turn moments into collectible prints.
         </p>
         <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap mb-1">
-          Create for you, a friend or a collection.
+          Create for you, a friend or the collection.
         </p>
         <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap">
-          Get featured in cafés and earn royalties.
+          Get voted into cafés and earn royalities.
         </p>
       </div>
       <div className="mb-6 flex justify-center w-full overflow-hidden">

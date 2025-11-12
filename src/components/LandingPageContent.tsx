@@ -96,7 +96,7 @@ export default function LandingPageContent() {
           Create for you, a friend or the collection.
         </p>
         <p className="text-center text-gray-300 font-notosans text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl whitespace-nowrap">
-          Get voted into cafés and earn royalities.
+          Get voted into cafés and earn royalties.
         </p>
       </div>
       <div className="mb-6 flex justify-center w-full overflow-hidden">

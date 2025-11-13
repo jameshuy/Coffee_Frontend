@@ -1170,13 +1170,6 @@ export default function Create() {
               <div className="flex flex-col items-center w-full">
                 {/* Action buttons in first row */}
                 <div className="flex flex-nowrap justify-center items-center overflow-x-auto gap-2 mt-16 md:gap-3 px-2 w-full max-w-full">
-                  <Button
-                    className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm"
-                    onClick={handleOrderPoster}
-                  >
-                    Order (A3)
-                  </Button>
-                  {/* Add Text button disabled as requested */}
 
                   {!isPosterUnlocked && (
                     <Button
@@ -1186,6 +1179,13 @@ export default function Create() {
                       Unlock&Own
                     </Button>
                   )}
+
+                  <Button
+                    className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm"
+                    onClick={handleOrderPoster}
+                  >
+                    Order (A3)
+                  </Button>
 
                   {/* Share button with Web Share API */}
                   {isPosterUnlocked && (

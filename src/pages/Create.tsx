@@ -553,6 +553,78 @@ export default function Create() {
     trackEvent("Share", "share_click");
   };
 
+  const handleDownloadPoster = async () => {
+    try {
+      trackEvent("Download", "download_initiated");
+
+      // Check if this is a video-based generation
+      const videoFrameData = formData.videoFrameData;
+      if (videoFrameData && videoFrameData.videoPath) {
+        // Download video with transition
+        toast({
+          title: "Preparing video download",
+          description: "Creating your video with poster transition...",
+        });
+
+        // Create merged video endpoint
+        const response = await apiRequest("POST", "/api/create-merged-video", {
+          videoPath: videoFrameData.videoPath,
+          posterPath: generatedPosterUrl,
+          timestamp: videoFrameData.timestamp,
+        });
+
+        const { mergedVideoUrl } = await response.json();
+
+        // Download the merged video
+        const link = document.createElement('a');
+        link.href = mergedVideoUrl;
+        link.download = `coffeeandprints_video_${Date.now()}.mp4`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        trackEvent("Download", "video_downloaded");
+      } else {
+        // Download high-resolution static image
+        toast({
+          title: "Processing download",
+          description: "Creating high-resolution 300 DPI image with borders...",
+        });
+
+        // Use the high-resolution download endpoint with currentPosterId
+        const response = await apiRequest("GET", `/api/download-hires/${currentPosterId}`);
+
+        if (!response.ok) {
+          throw new Error('Failed to generate high-resolution image');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `coffeeandprints_poster_${Date.now()}-hires.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        toast({
+          title: "Download complete",
+          description: "Your high-resolution poster has been downloaded.",
+        });
+
+        trackEvent("Download", "image_downloaded");
+      }
+    } catch (error) {
+      console.error("Download error:", error);
+      toast({
+        title: "Download failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  }
+
   // Function to handle Sell button click - sets the image as public
   const handleSellClick = () => {
     // Account creation disabled - all users have unlimited access
@@ -1142,6 +1214,7 @@ export default function Create() {
                       <Button
                         className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center"
                         aria-label="Download"
+                        onClick={handleDownloadPoster}
                       >
                         <Download size={16} />
                       </Button>

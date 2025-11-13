@@ -1,11 +1,12 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
-import { XCircle, Eye, EyeOff, ChevronLeft, ChevronRight, Share } from "lucide-react";
+import { XCircle, Eye, EyeOff, ChevronLeft, ChevronRight, Lock, Share } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import SellPosterModal from "@/components/SellPosterModal";
+import { UnlockModal } from "./UnlockModal";
 import UnpublishConfirmationModal from "@/components/UnpublishConfirmationModal";
 
 import { useAuth } from "@/context/AuthContext";
@@ -53,7 +54,7 @@ export default function DashboardImageModal({
   onShare,
   onOpenSubscriptionModal,
 }: DashboardImageModalProps) {
-  const { user } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
   const [isUnpublishConfirmOpen, setIsUnpublishConfirmOpen] = useState(false);
   const [currentIsPublic, setCurrentIsPublic] = useState(isPublic);
@@ -70,6 +71,30 @@ export default function DashboardImageModal({
   const [processingPaymentStatus, setProcessingPaymentStatus] = useState("");
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [isPosterUnlocked, setIsPosterUnlocked] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+
+  // Update local state when prop changes
+  useEffect(() => {
+    const checkUnlockStatus = async () => {
+      if (isAuthenticated && id) {
+        try {
+          const unlockResponse = await apiRequest("GET", `/api/check-poster-unlock/${id}`);
+          const unlockData = await unlockResponse.json();
+          setIsPosterUnlocked(unlockData.unlocked || false);
+        } catch (error) {
+          console.error("Failed to check unlock status:", error);
+          setIsPosterUnlocked(false);
+        }
+      } else {
+        setIsPosterUnlocked(false);
+      }
+    };
+
+    if (isOpen) {
+      checkUnlockStatus();
+    }
+  }, [isOpen, id, isAuthenticated]);
 
   // Update local state when prop changes
   useEffect(() => {
@@ -94,6 +119,20 @@ export default function DashboardImageModal({
     }
   }, [isOpen]);
 
+
+  // Function to handle Unlock button click
+  const handleUnlockClick = () => {
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "Invalid poster ID",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsUnlockModalOpen(true);
+    trackEvent("Unlock", "unlock_button_clicked");
+  };
   // Handle Order Poster (A3) button click
   const handleOrderPoster = () => {
     setOrderStep("shipping");
@@ -133,7 +172,7 @@ export default function DashboardImageModal({
   // Handle payment completion
   const handlePaymentComplete = async (paymentIntentId?: string) => {
     if (!paymentIntentId) return;
-    
+
     setProcessingPaymentStatus("Completing your order...");
 
     try {
@@ -147,7 +186,7 @@ export default function DashboardImageModal({
         confirmationId: orderNumber,
       });
       const { confirmationId } = await response.json();
-      
+
       trackEvent("Checkout", "order_completed", `style:${style},qty:1`);
       trackEvent("Checkout", "step_complete");
 
@@ -173,16 +212,16 @@ export default function DashboardImageModal({
     onSuccess: async (data, makePublic) => {
       // Update local state immediately
       setCurrentIsPublic(makePublic);
-      
+
       // Invalidate and refetch user images
       queryClient.invalidateQueries({ queryKey: ['/api/user-images'] });
-      
+
       // If unpublishing, force refresh user stats to update poster count
       if (!makePublic && user?.email) {
         try {
           // Small delay to ensure database transaction completes
           await new Promise(resolve => setTimeout(resolve, 100));
-          
+
           // Add timestamp to bypass cache
           const refreshResponse = await apiRequest('GET', `/api/user-poster-stats?email=${encodeURIComponent(user.email)}&t=${Date.now()}`);
           if (refreshResponse.ok) {
@@ -244,7 +283,7 @@ export default function DashboardImageModal({
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (!isOpen) return;
-    
+
     if (event.key === "Escape") {
       onClose();
     } else if (event.key === "ArrowLeft" && hasPrevious && onPrevious) {
@@ -262,9 +301,8 @@ export default function DashboardImageModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className={`top-[50%] translate-y-[-50%] sm:max-w-4xl max-h-[90vh] bg-black border-gray-800 p-0 [&>button]:hidden ${
-          orderStep !== "idle" ? "overflow-y-auto" : "overflow-hidden"
-        }`}>
+        <DialogContent className={`top-[50%] translate-y-[-50%] sm:max-w-4xl max-h-[90vh] bg-black border-gray-800 p-0 [&>button]:hidden ${orderStep !== "idle" ? "overflow-y-auto" : "overflow-hidden"
+          }`}>
           <VisuallyHidden>
             <DialogTitle>Poster with {style} style</DialogTitle>
           </VisuallyHidden>
@@ -278,7 +316,7 @@ export default function DashboardImageModal({
               <ChevronLeft className="h-8 w-8 text-white" />
             </button>
           )}
-          
+
           {hasNext && onNext && (
             <button
               onClick={onNext}
@@ -288,196 +326,209 @@ export default function DashboardImageModal({
             </button>
           )}
 
-        <div className="flex flex-col items-center space-y-6 md:p-6 py-2">
-          {/* Image container */}
-          <div className="flex justify-center items-center min-h-[300px]">
-            {/* Loading spinner */}
-            {imageLoading && (
-              <div className="flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-              </div>
-            )}
-            
-            {/* Image container with white border - only shown when image is loaded */}
-            {!imageLoading && (
-              <div 
-                className="bg-white p-4 md:p-6 shadow-xl rounded-sm"
-                style={{ 
-                  width: "auto",
-                  height: "auto",
-                  maxWidth: "90%",
-                  maxHeight: "70vh"
-                }}
-              >
-                <img
-                  src={imageUrl}
-                  alt={`Poster with ${style} style`}
-                  className="select-none pointer-events-none"
-                  draggable="false"
-                  onContextMenu={(e) => e.preventDefault()}
+          <div className="flex flex-col items-center space-y-6 md:p-6 py-2">
+            {/* Image container */}
+            <div className="flex justify-center items-center min-h-[300px]">
+              {/* Loading spinner */}
+              {imageLoading && (
+                <div className="flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+
+              {/* Image container with white border - only shown when image is loaded */}
+              {!imageLoading && (
+                <div
+                  className="bg-white p-4 md:p-6 shadow-xl rounded-sm"
                   style={{
-                    display: "block",
-                    maxWidth: "100%",
-                    maxHeight: "calc(70vh - 80px)",
                     width: "auto",
                     height: "auto",
-                    objectFit: "contain",
-                    userSelect: "none"
+                    maxWidth: "90%",
+                    maxHeight: "70vh"
                   }}
-                />
-              </div>
-            )}
-            
-            {/* Hidden image for loading detection */}
-            <img
-              src={imageUrl}
-              alt=""
-              className="hidden"
-              onLoad={() => setImageLoading(false)}
-              onError={() => setImageLoading(false)}
-            />
-          </div>
-          
-          {/* Order, Publish/Unpublish, and Close button section */}
-          <div className="flex items-center justify-center space-x-1 md:space-x-4 mt-6 w-full max-w-md">
-            {/* Order (A3) button */}
-            {!orderCompleted && (
-              <Button 
-                className="px-2 md:px-4 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 flex items-center space-x-2"
-                onClick={handleOrderPoster}
-                disabled={orderStep !== "idle"}
-              >
-                <span>{orderStep === "idle" ? "Order (A3)" : "Ordering..."}</span>
-              </Button>
-            )}
-            
-            {/* Publish/Unpublish button - available to all users */}
-            <Button 
-              className="px-2 md:px-4 md:ml-0 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 flex items-center space-x-2"
-              onClick={handlePublishToggle}
-              disabled={togglePublicMutation.isPending}
-            >
-              {currentIsPublic ? (
-                <>
-                  <EyeOff className="w-4 h-4" />
-                  <span>{togglePublicMutation.isPending ? "Unpublishing..." : "Unpublish"}</span>
-                </>
-              ) : (
-                <>
-                  <Eye className="w-4 h-4" />
-                  <span>{togglePublicMutation.isPending ? "Publishing..." : "Publish"}</span>
-                </>
-              )}
-            </Button>
-            
-            {/* Custom close button */}
-            <button
-              onClick={onClose}
-              className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-2 flex items-center justify-center transition-colors"
-              aria-label="Close"
-            >
-              <XCircle size={20} />
-            </button>
-          </div>
-
-          {/* Shipping & Payment Flow */}
-          {orderStep === "shipping" && !orderCompleted && (
-            <div className="w-full mt-8 max-w-md px-2">
-              {/* Order Summary */}
-              <OrderSummary />
-              
-              <h2 className="text-xl md:text-2xl font-racing-sans mb-6 text-center text-white">
-                Shipping Information
-              </h2>
-              
-              <ShippingForm
-                imageDataUrl={imageUrl}
-                onSuccess={handleShippingComplete}
-                hideSubmitButton={true}
-                isProcessing={isProcessingPayment}
-              />
-
-              {/* Separate payment button */}
-              <div className="pt-4 mb-8">
-                <Button
-                  onClick={() => {
-                    const submitButton = document.getElementById("shipping-form-submit") as HTMLButtonElement;
-                    if (submitButton) {
-                      submitButton.click();
-                    }
-                  }}
-                  className="w-full py-3 px-4 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-lg"
-                  disabled={isProcessingPayment}
                 >
-                  {isProcessingPayment ? (
-                    <div className="flex items-center justify-center">
-                      <span className="animate-spin mr-2 h-4 w-4 border-2 border-t-transparent rounded-full"></span>
-                      Processing...
-                    </div>
-                  ) : (
-                    "Proceed to Payment"
-                  )}
+                  <img
+                    src={imageUrl}
+                    alt={`Poster with ${style} style`}
+                    className="select-none pointer-events-none"
+                    draggable="false"
+                    onContextMenu={(e) => e.preventDefault()}
+                    style={{
+                      display: "block",
+                      maxWidth: "100%",
+                      maxHeight: "calc(70vh - 80px)",
+                      width: "auto",
+                      height: "auto",
+                      objectFit: "contain",
+                      userSelect: "none"
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Hidden image for loading detection */}
+              <img
+                src={imageUrl}
+                alt=""
+                className="hidden"
+                onLoad={() => setImageLoading(false)}
+                onError={() => setImageLoading(false)}
+              />
+            </div>
+
+            {/* Order, Publish/Unpublish, and Close button section */}
+            <div className="flex items-center justify-center space-x-1 md:space-x-4 mt-6 w-full max-w-md">
+
+              {/* Publish/Unpublish button - available to all users */}
+              {
+                isPosterUnlocked ? (
+                  <Button
+                    className="px-2 md:px-4 md:ml-0 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 flex items-center space-x-2"
+                    onClick={handlePublishToggle}
+                    disabled={togglePublicMutation.isPending}
+                  >
+                    {currentIsPublic ? (
+                      <>
+                        <EyeOff className="w-4 h-4" />
+                        <span>{togglePublicMutation.isPending ? "Unpublishing..." : "Unpublish"}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="w-4 h-4" />
+                        <span>{togglePublicMutation.isPending ? "Publishing..." : "Publish"}</span>
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    className="bg-[#f1b917] text-black rounded font-racing-sans hover:bg-[#f1b917]/90 transition-colors duration-200 flex items-center space-x-2"
+                    onClick={handleUnlockClick}
+                  >
+                    <Lock className="w-4 h-4" />
+                    <span>Unlock&Own</span>
+                  </Button>
+                )
+              }
+
+              {/* Order (A3) button */}
+              {!orderCompleted && (
+                <Button
+                  className="px-2 md:px-4 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 flex items-center space-x-2"
+                  onClick={handleOrderPoster}
+                  disabled={orderStep !== "idle"}
+                >
+                  <span>{orderStep === "idle" ? "Order (A3)" : "Ordering..."}</span>
                 </Button>
-              </div>
-            </div>
-          )}
+              )}
 
-          {/* Payment Flow */}
-          {orderStep === "payment" && paymentReady && clientSecret && !orderCompleted && (
-            <div className="w-full mt-8 max-w-md">
-              <h2 className="text-xl md:text-2xl font-racing-sans mb-6 text-center text-white">
-                Payment
-              </h2>
-              
-              <Elements 
-                stripe={stripePromise} 
-                options={{
-                  clientSecret,
-                  appearance: {
-                    theme: 'night',
-                    variables: {
-                      colorPrimary: '#f1b917',
-                      colorBackground: '#1f2937',
-                      colorText: '#ffffff',
-                      colorDanger: '#df1b41',
-                      fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-                      spacingUnit: '4px',
-                      borderRadius: '6px',
-                    },
-                  },
-                }}
-              >
-                <CheckoutForm 
-                  onPaymentComplete={handlePaymentComplete}
-                  processingStatus={processingPaymentStatus}
-                  onBack={() => setOrderStep("shipping")}
-                />
-              </Elements>
             </div>
-          )}
 
-          {/* Order Completion */}
-          {orderCompleted && orderNumber && (
-            <div className="w-full mt-8 max-w-md text-center">
-              <div className="bg-green-900/30 border border-green-800 rounded-md px-6 py-8">
-                <h2 className="text-xl font-racing-sans text-green-400 mb-4">
-                  Order Confirmed!
+            {/* Shipping & Payment Flow */}
+            {orderStep === "shipping" && !orderCompleted && (
+              <div className="w-full mt-8 max-w-md px-2">
+                {/* Order Summary */}
+                <OrderSummary />
+
+                <h2 className="text-xl md:text-2xl font-racing-sans mb-6 text-center text-white">
+                  Shipping Information
                 </h2>
-                <p className="text-gray-300 mb-2">
-                  Your order number is:
-                </p>
-                <p className="text-white font-mono text-lg">
-                  {orderNumber}
-                </p>
-                <p className="text-gray-400 text-sm mt-4">
-                  We'll send you an email confirmation shortly.
-                </p>
+
+                <ShippingForm
+                  imageDataUrl={imageUrl}
+                  onSuccess={handleShippingComplete}
+                  hideSubmitButton={true}
+                  isProcessing={isProcessingPayment}
+                />
+
+                {/* Separate payment button */}
+                <div className="pt-4 mb-8">
+                  <Button
+                    onClick={() => {
+                      const submitButton = document.getElementById("shipping-form-submit") as HTMLButtonElement;
+                      if (submitButton) {
+                        submitButton.click();
+                      }
+                    }}
+                    className="w-full py-3 px-4 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-lg"
+                    disabled={isProcessingPayment}
+                  >
+                    {isProcessingPayment ? (
+                      <div className="flex items-center justify-center">
+                        <span className="animate-spin mr-2 h-4 w-4 border-2 border-t-transparent rounded-full"></span>
+                        Processing...
+                      </div>
+                    ) : (
+                      "Proceed to Payment"
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+
+            {/* Payment Flow */}
+            {orderStep === "payment" && paymentReady && clientSecret && !orderCompleted && (
+              <div className="w-full mt-8 max-w-md">
+                <h2 className="text-xl md:text-2xl font-racing-sans mb-6 text-center text-white">
+                  Payment
+                </h2>
+
+                <Elements
+                  stripe={stripePromise}
+                  options={{
+                    clientSecret,
+                    appearance: {
+                      theme: 'night',
+                      variables: {
+                        colorPrimary: '#f1b917',
+                        colorBackground: '#1f2937',
+                        colorText: '#ffffff',
+                        colorDanger: '#df1b41',
+                        fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+                        spacingUnit: '4px',
+                        borderRadius: '6px',
+                      },
+                    },
+                  }}
+                >
+                  <CheckoutForm
+                    onPaymentComplete={handlePaymentComplete}
+                    processingStatus={processingPaymentStatus}
+                    onBack={() => setOrderStep("shipping")}
+                  />
+                </Elements>
+              </div>
+            )}
+
+            {/* Order Completion */}
+            {orderCompleted && orderNumber && (
+              <div className="w-full mt-8 max-w-md text-center">
+                <div className="bg-green-900/30 border border-green-800 rounded-md px-6 py-8">
+                  <h2 className="text-xl font-racing-sans text-green-400 mb-4">
+                    Order Confirmed!
+                  </h2>
+                  <p className="text-gray-300 mb-2">
+                    Your order number is:
+                  </p>
+                  <p className="text-white font-mono text-lg">
+                    {orderNumber}
+                  </p>
+                  <p className="text-gray-400 text-sm mt-4">
+                    We'll send you an email confirmation shortly.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
+
+      <UnlockModal
+        open={isUnlockModalOpen}
+        onOpenChange={setIsUnlockModalOpen}
+        posterId={id}
+        posterUrl={imageUrl || ''}
+        onUnlockSuccess={() => { }}
+      />
 
       {/* Sell Poster Modal */}
       <SellPosterModal

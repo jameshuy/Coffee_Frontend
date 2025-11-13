@@ -105,9 +105,51 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
   const hasPausedForPoster = useRef(false);
   const isPosterShowing = useRef(false);
   const posterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoInfoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const touchHideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  const clearAutoInfoTimeout = useCallback(() => {
+    if (autoInfoTimeoutRef.current) {
+      clearTimeout(autoInfoTimeoutRef.current);
+      autoInfoTimeoutRef.current = null;
+    }
+  }, []);
+
+  const clearTouchHideTimeout = useCallback(() => {
+    if (touchHideTimeoutRef.current) {
+      clearTimeout(touchHideTimeoutRef.current);
+      touchHideTimeoutRef.current = null;
+    }
+  }, []);
+
+  const handleHoverStart = useCallback(() => {
+    clearAutoInfoTimeout();
+    clearTouchHideTimeout();
+    setIsHovered(true);
+  }, [clearAutoInfoTimeout, clearTouchHideTimeout]);
+
+  const handleHoverEnd = useCallback(() => {
+    clearTouchHideTimeout();
+    setIsHovered(false);
+  }, [clearTouchHideTimeout]);
+
+  const handleTouchStart = useCallback(() => {
+    clearAutoInfoTimeout();
+    clearTouchHideTimeout();
+    setIsHovered(true);
+  }, [clearAutoInfoTimeout, clearTouchHideTimeout]);
+
+  const handleTouchEnd = useCallback(() => {
+    clearAutoInfoTimeout();
+    clearTouchHideTimeout();
+    touchHideTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+      touchHideTimeoutRef.current = null;
+    }, 2000);
+  }, [clearAutoInfoTimeout, clearTouchHideTimeout]);
 
   // Calculate container height based on generated image aspect ratio to maintain 18px border on all sides
   // Always use generated image dimensions so videos match image size
@@ -225,6 +267,27 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
       height: renderedHeight,
     });
   }, []);
+
+  // Automatically show poster info briefly when the item becomes visible
+  useEffect(() => {
+    clearAutoInfoTimeout();
+    clearTouchHideTimeout();
+
+    if (isVisible) {
+      setIsHovered(true);
+      autoInfoTimeoutRef.current = setTimeout(() => {
+        setIsHovered(false);
+        autoInfoTimeoutRef.current = null;
+      }, 3000);
+    } else {
+      setIsHovered(false);
+    }
+
+    return () => {
+      clearAutoInfoTimeout();
+      clearTouchHideTimeout();
+    };
+  }, [isVisible, post.id, clearAutoInfoTimeout, clearTouchHideTimeout]);
 
   // Recalculate bounds when media loads or container resizes
   useEffect(() => {
@@ -393,6 +456,12 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
       if (posterTimeoutRef.current) {
         clearTimeout(posterTimeoutRef.current);
       }
+      if (autoInfoTimeoutRef.current) {
+        clearTimeout(autoInfoTimeoutRef.current);
+      }
+      if (touchHideTimeoutRef.current) {
+        clearTimeout(touchHideTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -431,10 +500,10 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
                 {/* Video container - overlay positioned relative to video element */}
                 <div
                   className="relative flex items-center justify-center"
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
-                  onTouchStart={() => setIsHovered(true)}
-                  onTouchEnd={() => setTimeout(() => setIsHovered(false), 2000)}
+                  onMouseEnter={handleHoverStart}
+                  onMouseLeave={handleHoverEnd}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
                 >
                   <video
                     ref={videoRef}
@@ -674,10 +743,10 @@ function FeedItem({ post, isVisible, onPrevious, onNext, hasPrevious, hasNext, c
               // Static poster display - use thumbnail for faster loading
               <div
                 className="relative w-full h-full"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                onTouchStart={() => setIsHovered(true)}
-                onTouchEnd={() => setTimeout(() => setIsHovered(false), 2000)}
+                onMouseEnter={handleHoverStart}
+                onMouseLeave={handleHoverEnd}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
               >
                 <img
                   ref={imageRef}

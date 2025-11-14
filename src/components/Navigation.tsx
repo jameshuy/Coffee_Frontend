@@ -94,7 +94,7 @@ export default function Navigation({ transparent = false }: NavigationProps) {
   return (
     <nav className={`${isLandingPage ? '' : 'fixed top-0 left-0 right-0 z-40'} ${transparent ? 'bg-transparent' : 'bg-black'} shadow-sm pt-3 pb-2`}>
       <div className="container mx-auto px-4">
-        <div className={`w-full relative ${isMobile && !isLandingPage ? 'border-b' : ''}`}>
+        <div className={`w-full relative`}>
           {isCreatePage || isFeedPage || isCollectionPage ? (
             // Create and Feed pages: same layout as catalogue page
             <div className="flex flex-col justify-center items-center text-center">
@@ -165,9 +165,6 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                       </button>
                     </div>
                   </div>
-
-                  {/* Horizontal line spanning from credits to logout */}
-                  <div className="w-full h-px bg-white mt-3"></div>
                 </div>
               )}
 
@@ -198,9 +195,6 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                       </button>
                     </div>
                   </div>
-
-                  {/* Horizontal line for unauthenticated users */}
-                  <div className="w-full h-px bg-white mt-3"></div>
                 </div>
               )}
             </div>
@@ -263,11 +257,6 @@ export default function Navigation({ transparent = false }: NavigationProps) {
                   )
                 )}
               </div>
-
-              {/* Horizontal line spanning from Dashboard/Settings title to logout button */}
-              {hasUserSession && (
-                <div className="w-full h-px bg-white mt-3"></div>
-              )}
             </div>
           ) : (
             // Other pages: centered layout
@@ -297,7 +286,9 @@ export default function Navigation({ transparent = false }: NavigationProps) {
             </div>
           )}
 
-
+          {isMobile && !isLandingPage ? <div className="w-full h-px bg-white mt-3"></div> : (
+            (isLandingPage || isCataloguePage) ? <></> : <div className="w-full h-px bg-white mt-3"></div>
+          )}
 
           {!isCataloguePage && !isDashboardPage && !isSettingsPage && !isCreatePage && !isEarnPage && (
             <div className="flex flex-col items-center justify-center mt-2 mb-1">

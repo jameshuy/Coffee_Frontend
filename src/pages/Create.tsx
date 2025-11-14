@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { useLocation } from "wouter";
@@ -701,13 +701,15 @@ export default function Create() {
   const [isSellPosterModalOpen, setIsSellPosterModalOpen] = useState(false);
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
   const [showTextTool, setShowTextTool] = useState<boolean>(false);
-  // Preview/transition state moved from ImageUploader
-  const [containerHeight, setContainerHeight] = useState(0);
   const [generatedImageLoaded, setGeneratedImageLoaded] = useState(false);
   const [showVideoTransition, setShowVideoTransition] = useState(false);
   const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const frameContainerRef = useRef<HTMLDivElement>(null);
+  const generatedImageRef = useRef<HTMLImageElement>(null);
+  const [calculatedContainerHeight, setCalculatedContainerHeight] = useState<number | null>(null);
+  const [calculatedImageSize, setCalculatedImageSize] = useState<{ width: number; height: number } | null>(null);
 
   // Update window dimensions when window resizes
   useEffect(() => {
@@ -728,23 +730,77 @@ export default function Create() {
     return cleanup;
   }, []);
 
-  // Calculate and update container height based on viewport
+  const calculatePreviewSizing = useCallback(() => {
+    if (!formData.uploadedImage) {
+      return;
+    }
+    const container = frameContainerRef.current;
+    const imageElement = generatedImageRef.current;
+
+    if (!container || !imageElement) return;
+
+    const containerRect = container.getBoundingClientRect();
+    let availableWidth = containerRect.width;
+
+    if (availableWidth === 0 && container.parentElement) {
+      availableWidth = container.parentElement.getBoundingClientRect().width;
+    }
+
+    if (availableWidth === 0 || imageElement.naturalWidth === 0 || imageElement.naturalHeight === 0) {
+      return;
+    }
+
+    const padding = isPosterGenerated ? 36 : 0;
+    const imageWidth = Math.max(0, availableWidth - padding);
+    if (imageWidth <= 0) return;
+
+    const aspectRatio = imageElement.naturalWidth / imageElement.naturalHeight;
+    const imageHeight = imageWidth / aspectRatio;
+
+    setCalculatedImageSize({ width: imageWidth, height: imageHeight });
+
+    const calculatedHeight = imageHeight + padding;
+    const maxHeight = window.innerHeight * 0.8;
+    setCalculatedContainerHeight(Math.min(Math.max(calculatedHeight, 400), maxHeight));
+  }, [formData.uploadedImage, isPosterGenerated]);
+
   useEffect(() => {
-    const calculateHeight = () => {
-      if (isPosterGenerated) {
-        const maxViewportHeight = window.innerHeight * 0.55;
-        const maxWidth = isMobile ? window.innerWidth * 0.8 : window.innerWidth * 0.65;
-        const heightBasedOnWidth = maxWidth / 0.707;
-        const optimalHeight = Math.min(maxViewportHeight, heightBasedOnWidth);
-        setContainerHeight(optimalHeight);
-      } else {
-        setContainerHeight(495);
+    if (!formData.uploadedImage) {
+      setCalculatedContainerHeight(null);
+      setCalculatedImageSize(null);
+      return;
+    }
+
+    const updateSizing = () => {
+      requestAnimationFrame(() => {
+        calculatePreviewSizing();
+      });
+    };
+
+    updateSizing();
+    window.addEventListener("resize", updateSizing);
+
+    const resizeObserver = new ResizeObserver(updateSizing);
+    if (frameContainerRef.current) {
+      resizeObserver.observe(frameContainerRef.current);
+      if (frameContainerRef.current.parentElement) {
+        resizeObserver.observe(frameContainerRef.current.parentElement);
+      }
+    }
+
+    const imageEl = generatedImageRef.current;
+    if (imageEl) {
+      imageEl.addEventListener("load", updateSizing);
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateSizing);
+      resizeObserver.disconnect();
+      if (imageEl) {
+        imageEl.removeEventListener("load", updateSizing);
       }
     };
-    calculateHeight();
-    window.addEventListener("resize", calculateHeight);
-    return () => window.removeEventListener("resize", calculateHeight);
-  }, [isMobile, isPosterGenerated]);
+  }, [calculatePreviewSizing, formData.uploadedImage]);
 
   // Reset image loaded state when generation starts
   useEffect(() => {
@@ -873,130 +929,226 @@ export default function Create() {
                               uploadedImage={formData.uploadedImage}
                             />
                           ) : (
-                            <div className={`ImagePreview w-full mx-auto flex justify-center items-center  ${!isMobile ? 'mt-40' : ''}`} style={{ maxWidth: isPosterGenerated ? 'none' : '350px' }}>
-                              <div
-                                ref={containerRef}
-                                className="relative mx-auto"
-                                style={{
-                                  height: containerHeight || 550,
-                                  width: containerHeight ? containerHeight * 0.707 : 389,
-                                  maxWidth: '95vw',
-                                  transition: 'all 0.5s ease-in-out, box-shadow 1.2s ease-in-out',
-                                  transform: 'scale(1)',
-                                  boxShadow: isPosterGenerated && generatedImageLoaded ? '0 0 30px rgba(255,215,0,0.7)' : 'none'
-                                }}
-                              >
-                                <div className="absolute inset-0 transition-opacity duration-500">
-                                  <div
-                                    className={`relative w-full h-full overflow-hidden rounded-lg`}
-                                    style={{ border: isPosterGenerated ? isMobile ? '15px solid white' : '20px solid white' : 'none' }}
-                                  >
-                                    {showVideoTransition && videoObjectUrl && formData.uploadedVideo ? (
-                                      <div className="relative w-full h-full">
-                                        <video
-                                          ref={videoRef}
-                                          src={videoObjectUrl}
-                                          className={`w-full h-full object-cover transition-all duration-1000 ease-in-out ${isGeneratingPoster ? 'opacity-60' : 'opacity-100'}`}
-                                          autoPlay
-                                          muted
-                                          loop
-                                          playsInline
-                                          onTimeUpdate={() => {
-                                            if (videoRef.current && formData.videoFrameData && isPosterGenerated && !isGeneratingPoster) {
-                                              const currentTime = videoRef.current.currentTime;
-                                              const targetTime = formData.videoFrameData.timestamp;
-                                              const posterDisplayDuration = 3;
-                                              const posterOverlay = document.getElementById('poster-overlay');
-                                              if (posterOverlay) {
-                                                const posterEndTime = targetTime + posterDisplayDuration;
-                                                if (currentTime >= targetTime && currentTime < posterEndTime) {
-                                                  if (posterOverlay.style.opacity !== '1') {
-                                                    posterOverlay.style.opacity = '1';
-                                                  }
-                                                  if (Math.abs(currentTime - targetTime) < 0.1 && !videoRef.current.paused) {
-                                                    videoRef.current.pause();
-                                                    setTimeout(() => {
-                                                      if (videoRef.current && !videoRef.current.ended) {
-                                                        videoRef.current.play();
-                                                      }
-                                                    }, posterDisplayDuration * 1000);
-                                                  }
-                                                } else {
-                                                  if (posterOverlay.style.opacity !== '0') {
-                                                    posterOverlay.style.opacity = '0';
+                            <>
+                              <div className={`ImagePreview w-full mx-auto flex justify-center items-center ${!isMobile ? 'mt-40' : ''}`} style={{ maxWidth: isPosterGenerated ? 'min(95vw, 680px)' : '350px' }}>
+                                <div
+                                  ref={frameContainerRef}
+                                  className={`relative mx-auto flex items-center justify-center ${isPosterGenerated ? 'bg-white p-[18px]' : ''}`}
+                                  style={{
+                                    height: calculatedContainerHeight || 550,
+                                    width: '100%',
+                                    maxWidth: '95vw',
+                                    transition: 'all 0.5s ease-in-out, box-shadow 1.2s ease-in-out',
+                                    transform: 'scale(1)',
+                                    boxShadow: isPosterGenerated && generatedImageLoaded ? '0 0 30px rgba(255,215,0,0.7)' : 'none'
+                                  }}
+                                >
+                                  <div className="absolute inset-0 transition-opacity duration-500">
+                                    <div
+                                      ref={containerRef}
+                                      className="relative w-full h-full overflow-hidden flex items-center justify-center"
+                                    >
+                                      {formData.uploadedImage && (
+                                        <img
+                                          ref={generatedImageRef}
+                                          src={formData.uploadedImage}
+                                          alt=""
+                                          className="hidden"
+                                          onLoad={() => {
+                                            setGeneratedImageLoaded(true);
+                                            calculatePreviewSizing();
+                                          }}
+                                        />
+                                      )}
+                                      {showVideoTransition && videoObjectUrl && formData.uploadedVideo ? (
+                                        <div className="relative w-full h-full">
+                                          <video
+                                            ref={videoRef}
+                                            src={videoObjectUrl}
+                                            className={`transition-all duration-1000 ease-in-out ${isGeneratingPoster ? 'opacity-60' : 'opacity-100'}`}
+                                            style={{
+                                              width: calculatedImageSize ? `${calculatedImageSize.width}px` : '100%',
+                                              height: calculatedImageSize ? `${calculatedImageSize.height}px` : 'auto',
+                                              objectFit: 'contain'
+                                            }}
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                            onTimeUpdate={() => {
+                                              if (videoRef.current && formData.videoFrameData && isPosterGenerated && !isGeneratingPoster) {
+                                                const currentTime = videoRef.current.currentTime;
+                                                const targetTime = formData.videoFrameData.timestamp;
+                                                const posterDisplayDuration = 3;
+                                                const posterOverlay = document.getElementById('poster-overlay');
+                                                if (posterOverlay) {
+                                                  const posterEndTime = targetTime + posterDisplayDuration;
+                                                  if (currentTime >= targetTime && currentTime < posterEndTime) {
+                                                    if (posterOverlay.style.opacity !== '1') {
+                                                      posterOverlay.style.opacity = '1';
+                                                    }
+                                                    if (Math.abs(currentTime - targetTime) < 0.1 && !videoRef.current.paused) {
+                                                      videoRef.current.pause();
+                                                      setTimeout(() => {
+                                                        if (videoRef.current && !videoRef.current.ended) {
+                                                          videoRef.current.play();
+                                                        }
+                                                      }, posterDisplayDuration * 1000);
+                                                    }
+                                                  } else {
+                                                    if (posterOverlay.style.opacity !== '0') {
+                                                      posterOverlay.style.opacity = '0';
+                                                    }
                                                   }
                                                 }
                                               }
-                                            }
+                                            }}
+                                          />
+                                          {isPosterGenerated && formData.uploadedImage && (
+                                            <img
+                                              id="poster-overlay"
+                                              src={formData.uploadedImage}
+                                              className="absolute inset-0 transition-opacity duration-500 opacity-0"
+                                              style={{
+                                                width: calculatedImageSize ? `${calculatedImageSize.width}px` : '100%',
+                                                height: calculatedImageSize ? `${calculatedImageSize.height}px` : 'auto',
+                                                objectFit: 'contain'
+                                              }}
+                                              alt="Generated poster at selected frame"
+                                              onLoad={() => {
+                                                setGeneratedImageLoaded(true);
+                                                calculatePreviewSizing();
+                                              }}
+                                            />
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <img
+                                          src={formData.uploadedImage}
+                                          className={`transition-all duration-1000 ease-in-out ${isGeneratingPoster ? 'opacity-40' : 'opacity-100'}`}
+                                          style={{
+                                            width: calculatedImageSize ? `${calculatedImageSize.width}px` : '100%',
+                                            height: calculatedImageSize ? `${calculatedImageSize.height}px` : 'auto',
+                                            objectFit: 'contain'
+                                          }}
+                                          alt="Your artistic poster"
+                                          onLoad={() => {
+                                            setGeneratedImageLoaded(true);
+                                            calculatePreviewSizing();
                                           }}
                                         />
-                                        {isPosterGenerated && formData.uploadedImage && (
-                                          <img
-                                            id="poster-overlay"
-                                            src={formData.uploadedImage}
-                                            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0"
-                                            alt="Generated poster at selected frame"
-                                          />
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <img
-                                        src={formData.uploadedImage}
-                                        className={`w-full h-full object-cover transition-all duration-1000 ease-in-out ${isGeneratingPoster ? 'opacity-40' : 'opacity-100'}`}
-                                        alt="Your artistic poster"
-                                        onLoad={() => setGeneratedImageLoaded(true)}
-                                      />
-                                    )}
+                                      )}
 
-                                    {isGeneratingPoster && (
-                                      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-60 rounded-lg">
-                                        <div className="animate-spin h-20 w-20 border-4 border-[#f1b917] border-t-transparent rounded-full shadow-lg mb-4"></div>
-                                        <p className="text-white text-lg font-medium mt-2">Creating Your Masterpiece...</p>
-                                        <p className="text-white text-sm opacity-80 mt-1">Do not navigate away from the page</p>
-                                        <p className="text-white text-sm opacity-80 mt-1">1 - 2 minutes</p>
-                                      </div>
-                                    )}
+                                      {isGeneratingPoster && (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-60">
+                                          <div className="animate-spin h-20 w-20 border-4 border-[#f1b917] border-t-transparent rounded-full shadow-lg mb-4"></div>
+                                          <p className="text-white text-lg font-medium mt-2">Creating Your Masterpiece...</p>
+                                          <p className="text-white text-sm opacity-80 mt-1">Do not navigate away from the page</p>
+                                          <p className="text-white text-sm opacity-80 mt-1">1 - 2 minutes</p>
+                                        </div>
+                                      )}
 
-                                    {isUploadingVideo && (
-                                      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-60 rounded-lg">
-                                        <div className="animate-spin h-20 w-20 border-4 border-[#f1b917] border-t-transparent rounded-full shadow-lg mb-4"></div>
-                                        <p className="text-white text-lg font-medium mt-2">Uploading Video...</p>
-                                        <p className="text-white text-sm opacity-80 mt-1">This may take a moment on mobile connections</p>
-                                      </div>
-                                    )}
+                                      {isUploadingVideo && (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-60">
+                                          <div className="animate-spin h-20 w-20 border-4 border-[#f1b917] border-t-transparent rounded-full shadow-lg mb-4"></div>
+                                          <p className="text-white text-lg font-medium mt-2">Uploading Video...</p>
+                                          <p className="text-white text-sm opacity-80 mt-1">This may take a moment on mobile connections</p>
+                                        </div>
+                                      )}
 
-                                    {formData.textOverlay && formData.textOverlay.text && (
-                                      <div
-                                        className={`absolute pointer-events-none z-30 ${showTextTool ? 'opacity-50' : 'opacity-100'}`}
-                                        style={{
-                                          left: `${formData.textOverlay.position.x}px`,
-                                          top: `${formData.textOverlay.position.y}px`
-                                        }}
-                                      >
-                                        <span
-                                          className="text-white text-2xl font-bold whitespace-nowrap"
-                                          style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)', display: 'inline-block' }}
+                                      {formData.textOverlay && formData.textOverlay.text && (
+                                        <div
+                                          className={`absolute pointer-events-none z-30 ${showTextTool ? 'opacity-50' : 'opacity-100'}`}
+                                          style={{
+                                            left: `${formData.textOverlay.position.x}px`,
+                                            top: `${formData.textOverlay.position.y}px`
+                                          }}
                                         >
-                                          {formData.textOverlay.text}
-                                        </span>
-                                      </div>
-                                    )}
+                                          <span
+                                            className="text-white text-2xl font-bold whitespace-nowrap"
+                                            style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)', display: 'inline-block' }}
+                                          >
+                                            {formData.textOverlay.text}
+                                          </span>
+                                        </div>
+                                      )}
 
-                                    {formData.uploadedImage && showTextTool && (
-                                      <TextOverlayTool
-                                        containerRef={containerRef}
-                                        onSave={(textOverlay) => {
-                                          handleTextSave(textOverlay);
-                                        }}
-                                        onCancel={handleTextCancel}
-                                        initialText={formData.textOverlay?.text || ''}
-                                        initialPosition={formData.textOverlay?.position || { x: 0, y: 0 }}
-                                      />
-                                    )}
+                                      {formData.uploadedImage && showTextTool && (
+                                        <TextOverlayTool
+                                          containerRef={containerRef}
+                                          onSave={(textOverlay) => {
+                                            handleTextSave(textOverlay);
+                                          }}
+                                          onCancel={handleTextCancel}
+                                          initialText={formData.textOverlay?.text || ''}
+                                          initialPosition={formData.textOverlay?.position || { x: 0, y: 0 }}
+                                        />
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
+
+                              {formData.uploadedImage && isPosterGenerated && !orderCompleted && (
+                                <div className="w-full flex justify-center mt-10">
+                                  <div className="flex flex-nowrap justify-center items-center overflow-x-auto gap-2 md:gap-3 px-2 w-full max-w-2xl">
+                                    {!isPosterUnlocked && (
+                                      <Button
+                                        className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-gray-100 transition-colors duration-200 text-xs sm:text-sm"
+                                        onClick={handleUnlockClick}
+                                      >
+                                        Unlock&Own
+                                      </Button>
+                                    )}
+
+                                    <Button
+                                      className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm"
+                                      onClick={handleOrderPoster}
+                                    >
+                                      Order (A3)
+                                    </Button>
+
+                                    {isPosterUnlocked && (
+                                      <>
+                                        {isAuthenticated && (
+                                          <Button
+                                            className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center"
+                                            onClick={handleShareClick}
+                                          >
+                                            <Share2 size={16} className="mr-1" /> Share
+                                          </Button>
+                                        )}
+
+                                        {isAuthenticated && (
+                                          <Button
+                                            className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center"
+                                            onClick={handleSellClick}
+                                          >
+                                            <Tag size={16} className="mr-1" /> Sell
+                                          </Button>
+                                        )}
+
+                                        <Button
+                                          className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center"
+                                          aria-label="Download"
+                                          onClick={handleDownloadPoster}
+                                        >
+                                          <Download size={16} />
+                                        </Button>
+                                      </>
+                                    )}
+
+                                    <Button
+                                      className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center"
+                                      onClick={() => { window.history.back(); }}
+                                      aria-label="New Poster"
+                                    >
+                                      <RotateCcw size={16} />
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </>
                           )
                         ) : (
                           formData.uploadedImage &&
@@ -1163,78 +1315,6 @@ export default function Create() {
                 }}
                 style={{ position: "fixed", top: 0, left: 0, zIndex: 100 }}
               />
-            )}
-
-            {/* Action buttons shown when poster is generated regardless of step (always visible after generation) */}
-            {formData.uploadedImage && isPosterGenerated && !orderCompleted && (
-              <div className="flex flex-col items-center w-full">
-                {/* Action buttons in first row */}
-                <div className="flex flex-nowrap justify-center items-center overflow-x-auto gap-2 mt-16 md:gap-3 px-2 w-full max-w-full">
-
-                  {!isPosterUnlocked && (
-                    <Button
-                      className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-gray-100 transition-colors duration-200 text-xs sm:text-sm"
-                      onClick={handleUnlockClick}
-                    >
-                      Unlock&Own
-                    </Button>
-                  )}
-
-                  <Button
-                    className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm"
-                    onClick={handleOrderPoster}
-                  >
-                    Order (A3)
-                  </Button>
-
-                  {/* Share button with Web Share API */}
-                  {isPosterUnlocked && (
-                    <>
-                      {/* Share button with Web Share API */}
-                      {isAuthenticated && (
-                        <Button
-                          className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center"
-                          onClick={handleShareClick}
-                        >
-                          <Share2 size={16} className="mr-1" /> Share
-                        </Button>
-                      )}
-
-                      {/* Sell button - visible to all authenticated users */}
-                      {isAuthenticated && (
-                        <Button
-                          className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center"
-                          onClick={handleSellClick}
-                        >
-                          <Tag size={16} className="mr-1" /> Sell
-                        </Button>
-                      )}
-
-                      {/* Download button */}
-                      <Button
-                        className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center"
-                        aria-label="Download"
-                        onClick={handleDownloadPoster}
-                      >
-                        <Download size={16} />
-                      </Button>
-                    </>
-                  )}
-
-                  <Button
-                    className="flex-none whitespace-nowrap px-3 sm:px-4 py-2 bg-white text-black rounded font-racing-sans hover:bg-[#f1b917] transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center"
-                    onClick={() => { window.history.back(); }}
-                    aria-label="New Poster"
-                  >
-                    <RotateCcw size={16} />
-                  </Button>
-                </div>
-
-                {/* Credits indicator removed from here - moved to Navigation */}
-
-
-
-              </div>
             )}
 
             {/* Hide buttons in shipping form when payment is ready */}
